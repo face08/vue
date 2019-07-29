@@ -157,7 +157,7 @@ function cached (fn) {
 }
 
 /**
- * Camelize a hyphen-delimited string.
+ * 连字符转驼峰 Camelize a hyphen-delimited string.
  */
 var camelizeRE = /-(\w)/g;
 var camelize = cached(function (str) {
@@ -165,14 +165,14 @@ var camelize = cached(function (str) {
 });
 
 /**
- * Capitalize a string.
+ * 首字母大写Capitalize a string.
  */
 var capitalize = cached(function (str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 });
 
 /**
- * Hyphenate a camelCase string.
+ * 驼峰转连字符Hyphenate a camelCase string.
  */
 var hyphenateRE = /\B([A-Z])/g;
 var hyphenate = cached(function (str) {
@@ -211,11 +211,12 @@ var bind = Function.prototype.bind
   : polyfillBind;
 
 /**
- * Convert an Array-like object to a real Array.
+ * 将类数组对象转换为数组Convert an Array-like object to a real Array.
  */
 
 
 /**
+ * 将 _from 对象的属性混合到 to 对象中
  * Mix properties into target object.
  */
 function extend (to, _from) {
@@ -226,6 +227,7 @@ function extend (to, _from) {
 }
 
 /**
+ * 将一个对象数组合并到一个对象中，并返回该对象
  * Merge an Array of Objects into a single Object.
  */
 function toObject (arr) {
@@ -239,6 +241,7 @@ function toObject (arr) {
 }
 
 /**
+ * 空函数
  * Perform no operation.
  * Stubbing args to make Flow happy without leaving useless transpiled code
  * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/)
@@ -256,6 +259,7 @@ var no = function (a, b, c) { return false; };
 var identity = function (_) { return _; };
 
 /**
+ * 根据编译器(compiler)的 modules 生成一个静态键字符串
  * Generate a static keys string from compiler modules.
  */
 function genStaticKeys (modules) {
@@ -265,6 +269,7 @@ function genStaticKeys (modules) {
 }
 
 /**
+ * 检查两个值是否相等
  * Check if two values are loosely equal - that is,
  * if they are plain objects, do they have the same shape?
  */
@@ -301,6 +306,7 @@ function looseEqual (a, b) {
   }
 }
 
+// 返回 val 在 arr 中的索引
 function looseIndexOf (arr, val) {
   for (var i = 0; i < arr.length; i++) {
     if (looseEqual(arr[i], val)) { return i }
@@ -309,6 +315,7 @@ function looseIndexOf (arr, val) {
 }
 
 /**
+ * 只调用一次的函数
  * Ensure a function is called only once.
  */
 function once (fn) {
@@ -338,6 +345,11 @@ var isAttr = makeMap(
   'spellcheck,src,srcdoc,srclang,srcset,start,step,style,summary,tabindex,' +
   'target,title,type,usemap,value,width,wrap'
 );
+
+var unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u0020]/; // eslint-disable-line no-control-regex
+var isSSRUnsafeAttr = function (name) {
+  return unsafeAttrCharRE.test(name)
+};
 
 /* istanbul ignore next */
 var isRenderableAttr = function (name) {
@@ -429,6 +441,9 @@ function renderAttrs (node) {
   }
 
   for (var key in attrs) {
+    if (isSSRUnsafeAttr(key)) {
+      continue
+    }
     if (key === 'style') {
       // leave it to the style module
       continue
@@ -715,6 +730,9 @@ var LIFECYCLE_HOOKS = [
 
 /*  */
 
+// 自定义type类型
+
+
 var config = ({
   /**
    * Option merge strategies (used in core/util/options)
@@ -796,6 +814,12 @@ var config = ({
    * Platform-dependent.
    */
   mustUseProp: no,
+
+  /**
+   * Perform updates asynchronously. Intended to be used by Vue Test Utils
+   * This will significantly reduce performance if set to false.
+   */
+  async: true,
 
   /**
    * Exposed for legacy reasons
@@ -928,6 +952,12 @@ Dep.prototype.depend = function depend () {
 Dep.prototype.notify = function notify () {
   // stabilize the subscriber list first
   var subs = this.subs.slice();
+  if (process.env.NODE_ENV !== 'production' && !config.async) {
+    // subs aren't sorted in scheduler if not running async
+    // we need to sort them now to make sure they fire in correct
+    // order
+    subs.sort(function (a, b) { return a.id - b.id; });
+  }
   for (var i = 0, l = subs.length; i < l; i++) {
     subs[i].update();
   }
@@ -1751,11 +1781,10 @@ function assertProp (
       valid = assertedType.valid;
     }
   }
+
   if (!valid) {
     warn(
-      "Invalid prop: type check failed for prop \"" + name + "\"." +
-      " Expected " + (expectedTypes.map(capitalize).join(', ')) +
-      ", got " + (toRawType(value)) + ".",
+      getInvalidTypeMessage(name, value, expectedTypes),
       vm
     );
     return
@@ -1822,6 +1851,49 @@ function getTypeIndex (type, expectedTypes) {
   return -1
 }
 
+function getInvalidTypeMessage (name, value, expectedTypes) {
+  var message = "Invalid prop: type check failed for prop \"" + name + "\"." +
+    " Expected " + (expectedTypes.map(capitalize).join(', '));
+  var expectedType = expectedTypes[0];
+  var receivedType = toRawType(value);
+  var expectedValue = styleValue(value, expectedType);
+  var receivedValue = styleValue(value, receivedType);
+  // check if we need to specify expected value
+  if (expectedTypes.length === 1 &&
+      isExplicable(expectedType) &&
+      !isBoolean(expectedType, receivedType)) {
+    message += " with value " + expectedValue;
+  }
+  message += ", got " + receivedType + " ";
+  // check if we need to specify received value
+  if (isExplicable(receivedType)) {
+    message += "with value " + receivedValue + ".";
+  }
+  return message
+}
+
+function styleValue (value, type) {
+  if (type === 'String') {
+    return ("\"" + value + "\"")
+  } else if (type === 'Number') {
+    return ("" + (Number(value)))
+  } else {
+    return ("" + value)
+  }
+}
+
+function isExplicable (value) {
+  var explicitTypes = ['string', 'number', 'boolean'];
+  return explicitTypes.some(function (elem) { return value.toLowerCase() === elem; })
+}
+
+function isBoolean () {
+  var args = [], len = arguments.length;
+  while ( len-- ) args[ len ] = arguments[ len ];
+
+  return args.some(function (elem) { return elem.toLowerCase() === 'boolean'; })
+}
+
 /*  */
 
 function handleError (err, vm, info) {
@@ -1871,6 +1943,7 @@ function logError (err, vm, info) {
 /* globals MessageChannel */
 
 var callbacks = [];
+// 全部调用
 function flushCallbacks () {
   var copies = callbacks.slice(0);
   callbacks.length = 0;
@@ -1912,6 +1985,9 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
  * Wrap a function so that if any code inside triggers state change,
  * the changes are queued using a (macro) task instead of a microtask.
  */
+
+
+// 添加下一帧回调
 
 /*  */
 
@@ -4980,7 +5056,7 @@ function genClassSegments (
   classBinding
 ) {
   if (staticClass && !classBinding) {
-    return [{ type: RAW, value: (" class=" + staticClass) }]
+    return [{ type: RAW, value: (" class=\"" + (JSON.parse(staticClass)) + "\"") }]
   } else {
     return [{
       type: EXPRESSION,
@@ -5820,6 +5896,9 @@ function renderStringList (
 function renderAttrs$1 (obj) {
   var res = '';
   for (var key in obj) {
+    if (isSSRUnsafeAttr(key)) {
+      continue
+    }
     res += renderAttr(key, obj[key]);
   }
   return res
@@ -6244,6 +6323,8 @@ function updateComponentListeners (
   target = undefined;
 }
 
+// 添加事件相关函数
+
 /*  */
 
 
@@ -6473,6 +6554,17 @@ function queueActivatedComponent (vm) {
 /*  */
 
 /*  */
+
+// defineProperty的代理
+
+
+
+
+
+
+
+
+// 添加 $set、$delete、$watch函数
 
 /*  */
 
@@ -6942,12 +7034,13 @@ function resolveInject (inject, vm) {
 
 /*  */
 
+// 初始化mixin
 
 
 
 
 function resolveConstructorOptions (Ctor) {
-  var options = Ctor.options;
+  var options = Ctor.options; // todo options从哪里定义
   if (Ctor.super) {
     var superOptions = resolveConstructorOptions(Ctor.super);
     var cachedSuperOptions = Ctor.superOptions;
@@ -8022,13 +8115,21 @@ TemplateRenderer.prototype.renderSync = function renderSync (content, context) {
 TemplateRenderer.prototype.renderStyles = function renderStyles (context) {
     var this$1 = this;
 
-  var cssFiles = this.clientManifest
-    ? this.clientManifest.all.filter(isCSS)
-    : [];
+  var initial = this.preloadFiles || [];
+  var async = this.getUsedAsyncFiles(context) || [];
+  var cssFiles = initial.concat(async).filter(function (ref) {
+      var file = ref.file;
+
+      return isCSS(file);
+    });
   return (
     // render links for css files
     (cssFiles.length
-      ? cssFiles.map(function (file) { return ("<link rel=\"stylesheet\" href=\"" + (this$1.publicPath) + "/" + file + "\">"); }).join('')
+      ? cssFiles.map(function (ref) {
+          var file = ref.file;
+
+          return ("<link rel=\"stylesheet\" href=\"" + (this$1.publicPath) + "/" + file + "\">");
+    }).join('')
       : '') +
     // context.styles is a getter exposed by vue-style-loader which contains
     // the inline component styles collected during SSR
@@ -8124,14 +8225,18 @@ TemplateRenderer.prototype.renderScripts = function renderScripts (context) {
     var this$1 = this;
 
   if (this.clientManifest) {
-    var initial = this.preloadFiles;
-    var async = this.getUsedAsyncFiles(context);
-    var needed = [initial[0]].concat(async || [], initial.slice(1));
-    return needed.filter(function (ref) {
+    var initial = this.preloadFiles.filter(function (ref) {
         var file = ref.file;
 
         return isJS(file);
-      }).map(function (ref) {
+      });
+    var async = (this.getUsedAsyncFiles(context) || []).filter(function (ref) {
+        var file = ref.file;
+
+        return isJS(file);
+      });
+    var needed = [initial[0]].concat(async || [], initial.slice(1));
+    return needed.map(function (ref) {
         var file = ref.file;
 
       return ("<script src=\"" + (this$1.publicPath) + "/" + file + "\" defer></script>")

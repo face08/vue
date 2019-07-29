@@ -5,15 +5,18 @@ import { eventsMixin } from './events'
 import { lifecycleMixin } from './lifecycle'
 import { warn } from '../util/index'
 
+// 默认空函数
 function Vue (options) {
   if (process.env.NODE_ENV !== 'production' &&
     !(this instanceof Vue)
   ) {
     warn('Vue is a constructor and should be called with the `new` keyword')
   }
+  // init.js
   this._init(options)
 }
 
+// 将 Vue 作为参数传递给导入的五个方法
 initMixin(Vue)
 stateMixin(Vue)
 eventsMixin(Vue)

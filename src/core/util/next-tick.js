@@ -8,6 +8,7 @@ import { isIOS, isNative } from './env'
 const callbacks = []
 let pending = false
 
+// 全部调用
 function flushCallbacks () {
   pending = false
   const copies = callbacks.slice(0)
@@ -87,6 +88,7 @@ export function withMacroTask (fn: Function): Function {
   })
 }
 
+// 添加下一帧回调
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
   callbacks.push(() => {
@@ -100,6 +102,7 @@ export function nextTick (cb?: Function, ctx?: Object) {
       _resolve(ctx)
     }
   })
+  //
   if (!pending) {
     pending = true
     if (useMacroTask) {

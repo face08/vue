@@ -2,6 +2,7 @@
 
 import { toArray } from '../util/index'
 
+// vue use 安装插件，主要调用install函数
 export function initUse (Vue: GlobalAPI) {
   Vue.use = function (plugin: Function | Object) {
     const installedPlugins = (this._installedPlugins || (this._installedPlugins = []))

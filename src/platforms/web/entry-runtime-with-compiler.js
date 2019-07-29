@@ -14,6 +14,7 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
+// 主要是：转为render函数
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (
   el?: string | Element,
@@ -21,6 +22,7 @@ Vue.prototype.$mount = function (
 ): Component {
   el = el && query(el)
 
+  // 挂载判断，如果是body、html，警告
   /* istanbul ignore if */
   if (el === document.body || el === document.documentElement) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -31,6 +33,7 @@ Vue.prototype.$mount = function (
 
   const options = this.$options
   // resolve template/el and convert to render function
+  // 如果没有render，转为render
   if (!options.render) {
     let template = options.template
     if (template) {
@@ -78,10 +81,12 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  // 回调mount函数：src/platforms/web/runtime/index.js
   return mount.call(this, el, hydrating)
 }
 
 /**
+ * 获取 html代码
  * Get outerHTML of elements, taking care
  * of SVG elements in IE as well.
  */

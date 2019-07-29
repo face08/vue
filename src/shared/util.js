@@ -151,7 +151,7 @@ export function cached<F: Function> (fn: F): F {
 }
 
 /**
- * Camelize a hyphen-delimited string.
+ * 连字符转驼峰 Camelize a hyphen-delimited string.
  */
 const camelizeRE = /-(\w)/g
 export const camelize = cached((str: string): string => {
@@ -159,14 +159,14 @@ export const camelize = cached((str: string): string => {
 })
 
 /**
- * Capitalize a string.
+ * 首字母大写Capitalize a string.
  */
 export const capitalize = cached((str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1)
 })
 
 /**
- * Hyphenate a camelCase string.
+ * 驼峰转连字符Hyphenate a camelCase string.
  */
 const hyphenateRE = /\B([A-Z])/g
 export const hyphenate = cached((str: string): string => {
@@ -205,7 +205,7 @@ export const bind = Function.prototype.bind
   : polyfillBind
 
 /**
- * Convert an Array-like object to a real Array.
+ * 将类数组对象转换为数组Convert an Array-like object to a real Array.
  */
 export function toArray (list: any, start?: number): Array<any> {
   start = start || 0
@@ -218,6 +218,7 @@ export function toArray (list: any, start?: number): Array<any> {
 }
 
 /**
+ * 将 _from 对象的属性混合到 to 对象中
  * Mix properties into target object.
  */
 export function extend (to: Object, _from: ?Object): Object {
@@ -228,6 +229,7 @@ export function extend (to: Object, _from: ?Object): Object {
 }
 
 /**
+ * 将一个对象数组合并到一个对象中，并返回该对象
  * Merge an Array of Objects into a single Object.
  */
 export function toObject (arr: Array<any>): Object {
@@ -241,6 +243,7 @@ export function toObject (arr: Array<any>): Object {
 }
 
 /**
+ * 空函数
  * Perform no operation.
  * Stubbing args to make Flow happy without leaving useless transpiled code
  * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/)
@@ -258,6 +261,7 @@ export const no = (a?: any, b?: any, c?: any) => false
 export const identity = (_: any) => _
 
 /**
+ * 根据编译器(compiler)的 modules 生成一个静态键字符串
  * Generate a static keys string from compiler modules.
  */
 export function genStaticKeys (modules: Array<ModuleOptions>): string {
@@ -267,6 +271,7 @@ export function genStaticKeys (modules: Array<ModuleOptions>): string {
 }
 
 /**
+ * 检查两个值是否相等
  * Check if two values are loosely equal - that is,
  * if they are plain objects, do they have the same shape?
  */
@@ -303,6 +308,7 @@ export function looseEqual (a: any, b: any): boolean {
   }
 }
 
+// 返回 val 在 arr 中的索引
 export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
   for (let i = 0; i < arr.length; i++) {
     if (looseEqual(arr[i], val)) return i
@@ -311,6 +317,7 @@ export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
 }
 
 /**
+ * 只调用一次的函数
  * Ensure a function is called only once.
  */
 export function once (fn: Function): Function {

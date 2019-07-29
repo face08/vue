@@ -34,6 +34,7 @@ extend(Vue.options.components, platformComponents)
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
+// 第二个参数是和服务端渲染相关
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean

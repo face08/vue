@@ -50,8 +50,10 @@ export function initRender (vm: Component) {
   }
 }
 
+// 混入render
 export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
+  // 添加帮助函数
   installRenderHelpers(Vue.prototype)
 
   Vue.prototype.$nextTick = function (fn: Function) {

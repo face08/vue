@@ -4,6 +4,7 @@ import { ASSET_TYPES } from 'shared/constants'
 import { defineComputed, proxy } from '../instance/state'
 import { extend, mergeOptions, validateComponentName } from '../util/index'
 
+// 继承、扩展，注册组件的时候会调用
 export function initExtend (Vue: GlobalAPI) {
   /**
    * Each instance constructor, including Vue, has a unique
@@ -15,6 +16,7 @@ export function initExtend (Vue: GlobalAPI) {
 
   /**
    * Class inheritance
+   * extendOptions:自定义的options
    */
   Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
@@ -30,9 +32,11 @@ export function initExtend (Vue: GlobalAPI) {
       validateComponentName(name)
     }
 
+    // 定义Vue组件
     const Sub = function VueComponent (options) {
       this._init(options)
     }
+    // 继承父类
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
     Sub.cid = cid++
@@ -45,9 +49,11 @@ export function initExtend (Vue: GlobalAPI) {
     // For props and computed properties, we define the proxy getters on
     // the Vue instances at extension time, on the extended prototype. This
     // avoids Object.defineProperty calls for each instance created.
+    // 有props，则初始化
     if (Sub.options.props) {
       initProps(Sub)
     }
+    // 有computed，初始化
     if (Sub.options.computed) {
       initComputed(Sub)
     }
@@ -80,6 +86,7 @@ export function initExtend (Vue: GlobalAPI) {
   }
 }
 
+// 初始化props
 function initProps (Comp) {
   const props = Comp.options.props
   for (const key in props) {
@@ -87,6 +94,7 @@ function initProps (Comp) {
   }
 }
 
+// 初始化computed
 function initComputed (Comp) {
   const computed = Comp.options.computed
   for (const key in computed) {

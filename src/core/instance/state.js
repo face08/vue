@@ -35,6 +35,7 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+// defineProperty的代理
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -307,6 +308,7 @@ function createWatcher (
   return vm.$watch(expOrFn, handler, options)
 }
 
+// 添加 $set、$delete、$watch函数
 export function stateMixin (Vue: Class<Component>) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
@@ -327,12 +329,12 @@ export function stateMixin (Vue: Class<Component>) {
       warn(`$props is readonly.`, this)
     }
   }
+  // 定义$data和$props
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
-
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
@@ -342,6 +344,7 @@ export function stateMixin (Vue: Class<Component>) {
     if (isPlainObject(cb)) {
       return createWatcher(vm, expOrFn, cb, options)
     }
+    // 立即回调
     options = options || {}
     options.user = true
     const watcher = new Watcher(vm, expOrFn, cb, options)
