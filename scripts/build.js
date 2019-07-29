@@ -46,7 +46,7 @@ function buildEntry (config) {
   const isProd = /min\.js$/.test(file)
   return rollup.rollup(config)
     .then(bundle => bundle.generate(output))
-    .then(({ code }) => {
+    .then(({ code, map }) => {
       if (isProd) {
         var minified = (banner ? banner + '\n' : '') + uglify.minify(code, {
           output: {
@@ -59,6 +59,7 @@ function buildEntry (config) {
         return write(file, minified, true)
       } else {
         return write(file, code)
+        // return write(file, code + '\r' + map)
       }
     })
 }

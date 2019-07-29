@@ -7,6 +7,9 @@
     "plugin:vue-libs/recommended",
     "plugin:flowtype/recommended"
   ],
+  "rules": {
+    "semi": ["error", "never"]
+  },
   "globals": {
     "__WEEX__": true,
     "WXEnvironment": true
