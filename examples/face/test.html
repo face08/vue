@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Vue.js github commits example</title>
+  <script src="../../dist/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  姓名：{{ name }}<br>
+  年龄：{{age}}<br>
+  说明：{{info.content}}
+  <div v-if="ok">性别：{{info.sex}}</div>
+</div>
+
+<!--
+  (function anonymous() {
+    with (this) {
+      return _c('div', {attrs: {"id": "app"}},
+      [_v("\n  姓名：" + _s(name)), _c('br'),
+      _v("\n  年龄：" + _s(age)), _c('br'),
+      _v("\n  说明：" + _s(info.content) + "\n  "),
+      (ok) ? _c('div', [_v("性别：" + _s(info.sex))]) : _e()])
+    }
+  })
+-->
+<!-- JavaScript 代码需要放在尾部（指定的HTML元素之后） -->
+<script>
+  var data = {
+    name: "简书",
+    ok: false,
+    age: '3',
+    info: {
+      content: 'my name is test'
+    }
+  }
+  var key = 'content';
+
+  var vm = new Vue({
+    el: '#app',
+    data: data,
+    created: function () {
+      Vue.set(data.info, 'sex', '男')
+      this.ok = true;
+      // this.$set(data.info, 'what is this?');
+    }
+  });
+
+
+</script>
+</body>
+</html>
