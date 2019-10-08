@@ -99,10 +99,11 @@ export default class Watcher {
   }
 
   /**
+   * 评估getter，并重新收集依赖项。
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
-    pushTarget(this)
+    pushTarget(this)  // dep内函数
     let value
     const vm = this.vm
     try {

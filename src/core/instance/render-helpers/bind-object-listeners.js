@@ -2,6 +2,13 @@
 
 import { warn, extend, isPlainObject } from 'core/util/index'
 
+/**
+ * todo 进入条件？
+ * v-on指令为对象值时会通过这里绑定多个事件,并将事件混入到data.on中
+ * _g(data,eventObj)
+ * data为已经编码完的数据对象
+ * eventObj  v-on指令的值即要注入事件的对象
+ */
 export function bindObjectListeners (data: any, value: any): VNodeData {
   if (value) {
     if (!isPlainObject(value)) {
@@ -10,6 +17,7 @@ export function bindObjectListeners (data: any, value: any): VNodeData {
         this
       )
     } else {
+      // 如果存在，合并为数组
       const on = data.on = data.on ? extend({}, data.on) : {}
       for (const key in value) {
         const existing = on[key]

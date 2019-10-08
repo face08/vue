@@ -12,15 +12,14 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 
 let uid = 0
 
-// 初始化mixin
+// 混入_init函数，混入完毕后调用
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
-    // a uid
-    vm._uid = uid++
+    vm._uid = uid++ // a uid 从0开始
 
-    let startTag, endTag
     // 性能相关
+    let startTag, endTag
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
       startTag = `vue-perf-start:${vm._uid}`
@@ -30,14 +29,14 @@ export function initMixin (Vue: Class<Component>) {
 
     // a flag to avoid this being observed
     vm._isVue = true
-    // merge options
+    // merge options todo 条件进入？
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
-      // 处理传进来的options
+      // mark 重要属性：合并属性到$options，注意data 返回为fun
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -51,12 +50,12 @@ export function initMixin (Vue: Class<Component>) {
       vm._renderProxy = vm
     }
     // expose real self
-    // 初始化声明周期、事件、、
+    // 初始化声明周期、事件、render、state
     vm._self = vm
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
-    callHook(vm, 'beforeCreate')
+    callHook(vm, 'beforeCreate')  // mark 生命周期函数
     initInjections(vm) // resolve injections before data/props
     initState(vm)
     initProvide(vm) // resolve provide after data/props
@@ -69,12 +68,15 @@ export function initMixin (Vue: Class<Component>) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
-    // 挂载
+    // el挂载
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
   }
 }
+
+// 以下上面条件进入=============
+
 
 export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
   const opts = vm.$options = Object.create(vm.constructor.options)
@@ -95,9 +97,10 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   }
 }
 
+// 处理构造函数的options
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   let options = Ctor.options // todo options从哪里定义
-  if (Ctor.super) {
+  if (Ctor.super) { // todo 条件进入？
     const superOptions = resolveConstructorOptions(Ctor.super)
     const cachedSuperOptions = Ctor.superOptions
     if (superOptions !== cachedSuperOptions) {

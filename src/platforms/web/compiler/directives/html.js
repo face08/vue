@@ -1,4 +1,5 @@
 /* @flow */
+// 指令：v-html
 
 import { addProp } from 'compiler/helpers'
 

@@ -7,6 +7,11 @@ import {
   baseWarn
 } from 'compiler/helpers'
 
+/**
+ * 解析 class 和 :class,然后生成需要的代码
+ * @param el ast元素
+ * @param options 编译参数
+ */
 function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')
@@ -30,6 +35,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   }
 }
 
+// 生成 class相关代码，如：staticClass:"static",class:{ active: isActive, 'text-danger': hasError },
 function genData (el: ASTElement): string {
   let data = ''
   if (el.staticClass) {

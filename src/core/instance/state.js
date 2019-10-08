@@ -29,13 +29,18 @@ import {
 } from '../util/index'
 
 const sharedPropertyDefinition = {
-  enumerable: true,
-  configurable: true,
+  enumerable: true, // 枚举属性中是否显示
+  configurable: true, // 是否能够被改变
   get: noop,
   set: noop
 }
 
-// defineProperty的代理
+/**
+ * defineProperty的代理
+ * @param target  vm
+ * @param sourceKey '_data'
+ * @param key 自定义data属性 比如：age
+ */
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -46,6 +51,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+// 初始化:props、methods、data、computed
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
@@ -62,6 +68,7 @@ export function initState (vm: Component) {
   }
 }
 
+// 初始化props
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
@@ -78,6 +85,7 @@ function initProps (vm: Component, propsOptions: Object) {
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
+      // 检查是否关键字冲突
       const hyphenatedKey = hyphenate(key)
       if (isReservedAttribute(hyphenatedKey) ||
           config.isReservedAttr(hyphenatedKey)) {
@@ -86,6 +94,7 @@ function initProps (vm: Component, propsOptions: Object) {
           vm
         )
       }
+      // 添加响应式
       defineReactive(props, key, value, () => {
         if (vm.$parent && !isUpdatingChildComponent) {
           warn(
@@ -110,6 +119,7 @@ function initProps (vm: Component, propsOptions: Object) {
   toggleObserving(true)
 }
 
+// 检查data，防止定义重复
 function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
@@ -128,9 +138,11 @@ function initData (vm: Component) {
   const props = vm.$options.props
   const methods = vm.$options.methods
   let i = keys.length
+  // 遍历data的key
   while (i--) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
+      // 防止methods重复
       if (methods && hasOwn(methods, key)) {
         warn(
           `Method "${key}" has already been defined as a data property.`,
@@ -138,6 +150,7 @@ function initData (vm: Component) {
         )
       }
     }
+    // 防止props重复
     if (props && hasOwn(props, key)) {
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
@@ -148,13 +161,14 @@ function initData (vm: Component) {
       proxy(vm, `_data`, key)
     }
   }
-  // observe data
+  // 添加相应：observe data
   observe(data, true /* asRootData */)
 }
 
+// 获取data
 export function getData (data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
-  pushTarget()
+  pushTarget()  // 置空
   try {
     return data.call(vm, vm)
   } catch (e) {
@@ -167,6 +181,7 @@ export function getData (data: Function, vm: Component): any {
 
 const computedWatcherOptions = { computed: true }
 
+// 初始化computed
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
   const watchers = vm._computedWatchers = Object.create(null)
@@ -199,6 +214,7 @@ function initComputed (vm: Component, computed: Object) {
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
     } else if (process.env.NODE_ENV !== 'production') {
+      // 检查命名冲突
       if (key in vm.$data) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
       } else if (vm.$options.props && key in vm.$options.props) {
@@ -208,6 +224,7 @@ function initComputed (vm: Component, computed: Object) {
   }
 }
 
+// 定义computed
 export function defineComputed (
   target: any,
   key: string,
@@ -251,10 +268,12 @@ function createComputedGetter (key) {
   }
 }
 
+// 初始化methods，检查命名是否冲突
 function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {
     if (process.env.NODE_ENV !== 'production') {
+      // 检查是否为空
       if (methods[key] == null) {
         warn(
           `Method "${key}" has an undefined value in the component definition. ` +
@@ -262,12 +281,14 @@ function initMethods (vm: Component, methods: Object) {
           vm
         )
       }
+      // 检查是否与prop冲突
       if (props && hasOwn(props, key)) {
         warn(
           `Method "${key}" has already been defined as a prop.`,
           vm
         )
       }
+      // 检查是否保留字
       if ((key in vm) && isReserved(key)) {
         warn(
           `Method "${key}" conflicts with an existing Vue instance method. ` +
@@ -279,6 +300,7 @@ function initMethods (vm: Component, methods: Object) {
   }
 }
 
+// 初始化watch
 function initWatch (vm: Component, watch: Object) {
   for (const key in watch) {
     const handler = watch[key]
@@ -292,6 +314,7 @@ function initWatch (vm: Component, watch: Object) {
   }
 }
 
+// 创建watcher
 function createWatcher (
   vm: Component,
   expOrFn: string | Function,
@@ -308,7 +331,10 @@ function createWatcher (
   return vm.$watch(expOrFn, handler, options)
 }
 
-// 添加 $set、$delete、$watch函数
+/**
+ * 混入data处理功能： 添加 $set、$delete、$watch函数：https://vuejs.org/v2/api/#Instance-Methods-Data
+ * @param Vue
+ */
 export function stateMixin (Vue: Class<Component>) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
@@ -329,7 +355,7 @@ export function stateMixin (Vue: Class<Component>) {
       warn(`$props is readonly.`, this)
     }
   }
-  // 定义$data和$props
+  // mark 主要属性：定义$data和$props，$watch
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
@@ -341,10 +367,11 @@ export function stateMixin (Vue: Class<Component>) {
     options?: Object
   ): Function {
     const vm: Component = this
+    // 是否简单的obj对象
     if (isPlainObject(cb)) {
       return createWatcher(vm, expOrFn, cb, options)
     }
-    // 立即回调
+    // 定义watcher，立即回调
     options = options || {}
     options.user = true
     const watcher = new Watcher(vm, expOrFn, cb, options)

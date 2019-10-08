@@ -1,4 +1,5 @@
 /* @flow */
+// vue全局配置
 
 import {
   no,
@@ -8,10 +9,10 @@ import {
 
 import { LIFECYCLE_HOOKS } from 'shared/constants'
 
-// 自定义type类型
+// 自定义type接口类型，供下面使用
 export type Config = {
-  // user
-  optionMergeStrategies: { [key: string]: Function };
+  // user 对应api的全局配置
+  optionMergeStrategies: { [key: string]: Function }; // 自定义合并策略的选项
   silent: boolean;
   productionTip: boolean;
   performance: boolean;

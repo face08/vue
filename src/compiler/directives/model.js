@@ -1,4 +1,5 @@
 /* @flow */
+// 指令：v-model 的通用函数
 
 /**
  * Cross-platform code generation for component v-model
@@ -31,6 +32,7 @@ export function genComponentModel (
 }
 
 /**
+ * 生成v-model value 代码
  * Cross-platform codegen helper for generating v-model value assignment code.
  */
 export function genAssignmentCode (
@@ -46,6 +48,7 @@ export function genAssignmentCode (
 }
 
 /**
+ * 解析v-model表达式，有以下格式情况
  * Parse a v-model expression into a base path and a final key segment.
  * Handles both dot-path and possible square brackets.
  *
@@ -62,20 +65,29 @@ export function genAssignmentCode (
 
 let len, str, chr, index, expressionPos, expressionEndPos
 
+// model 解析后的数据结构
 type ModelParseResult = {
-  exp: string,
-  key: string | null
+  exp: string,  // 表达式
+  key: string | null  //  值
 }
 
+/**
+ * 解析model  {{ msg }}
+ * @param val msg
+ * @returns {{exp: string, key: string}|{exp: string, key: null}}
+ */
 export function parseModel (val: string): ModelParseResult {
   // Fix https://github.com/vuejs/vue/pull/7730
   // allow v-model="obj.val " (trailing whitespace)
   val = val.trim()
   len = val.length
 
+  // 如果不包含[]
+  // 比如：test[test1[key]]
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
     index = val.lastIndexOf('.')
     if (index > -1) {
+      // 如果包含.
       return {
         exp: val.slice(0, index),
         key: '"' + val.slice(index + 1) + '"'
@@ -88,6 +100,7 @@ export function parseModel (val: string): ModelParseResult {
     }
   }
 
+  // todo 何时进来
   str = val
   index = expressionPos = expressionEndPos = 0
 
@@ -107,14 +120,17 @@ export function parseModel (val: string): ModelParseResult {
   }
 }
 
+// 下一个字符
 function next (): number {
   return str.charCodeAt(++index)
 }
 
+// 是否结束
 function eof (): boolean {
   return index >= len
 }
 
+// 是否起始:"、'
 function isStringStart (chr: number): boolean {
   return chr === 0x22 || chr === 0x27
 }
@@ -137,6 +153,7 @@ function parseBracket (chr: number): void {
   }
 }
 
+// 按字符解析str
 function parseString (chr: number): void {
   const stringQuote = chr
   while (!eof()) {

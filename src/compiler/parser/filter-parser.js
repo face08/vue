@@ -2,6 +2,11 @@
 
 const validDivisionCharRE = /[\w).+\-_$\]]/
 
+/**
+ * 解析过滤器
+ * @param exp 表达式
+ * @returns {*} 返回表达式：_f("capitalize")(name)
+ */
 export function parseFilters (exp: string): string {
   let inSingle = false
   let inDouble = false
@@ -13,6 +18,7 @@ export function parseFilters (exp: string): string {
   let lastFilterIndex = 0
   let c, prev, i, expression, filters
 
+  // 字符意义如下：String.fromCharCode(0x60)
   for (i = 0; i < exp.length; i++) {
     prev = c
     c = exp.charCodeAt(i)
@@ -48,6 +54,7 @@ export function parseFilters (exp: string): string {
         case 0x5D: square--; break                // ]
         case 0x7B: curly++; break                 // {
         case 0x7D: curly--; break                 // }
+        // 5C：\；7C：|；2F：/
       }
       if (c === 0x2f) { // /
         let j = i - 1

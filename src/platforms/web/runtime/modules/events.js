@@ -1,4 +1,5 @@
 /* @flow */
+// 事件的添加、移除和更新
 
 import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
@@ -11,7 +12,7 @@ import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model
 // user-attached handlers.
 function normalizeEvents (on) {
   /* istanbul ignore if */
-  if (isDef(on[RANGE_TOKEN])) {
+  if (isDef(on[RANGE_TOKEN])) { //  __r
     // IE input[type=range] only supports `change` event
     const event = isIE ? 'change' : 'input'
     on[event] = [].concat(on[RANGE_TOKEN], on[event] || [])
@@ -20,7 +21,7 @@ function normalizeEvents (on) {
   // This was originally intended to fix #4521 but no longer necessary
   // after 2.5. Keeping it for backwards compat with generated code from < 2.4
   /* istanbul ignore if */
-  if (isDef(on[CHECKBOX_RADIO_TOKEN])) {
+  if (isDef(on[CHECKBOX_RADIO_TOKEN])) {  // __c
     on.change = [].concat(on[CHECKBOX_RADIO_TOKEN], on.change || [])
     delete on[CHECKBOX_RADIO_TOKEN]
   }
@@ -28,6 +29,13 @@ function normalizeEvents (on) {
 
 let target: any
 
+/**
+ * 创建一次处理事件
+ * @param handler
+ * @param event
+ * @param capture
+ * @returns {onceHandler}
+ */
 function createOnceHandler (handler, event, capture) {
   const _target = target // save current target element in closure
   return function onceHandler () {
@@ -38,6 +46,14 @@ function createOnceHandler (handler, event, capture) {
   }
 }
 
+/**
+ * 添加事件
+ * @param event
+ * @param handler
+ * @param once
+ * @param capture
+ * @param passive
+ */
 function add (
   event: string,
   handler: Function,
@@ -47,6 +63,7 @@ function add (
 ) {
   handler = withMacroTask(handler)
   if (once) handler = createOnceHandler(handler, event, capture)
+  // 原生添加事件
   target.addEventListener(
     event,
     handler,
@@ -56,12 +73,20 @@ function add (
   )
 }
 
+/**
+ * 移除事件
+ * @param event
+ * @param handler
+ * @param capture
+ * @param _target
+ */
 function remove (
   event: string,
   handler: Function,
   capture: boolean,
   _target?: HTMLElement
 ) {
+  // 原生移除
   (_target || target).removeEventListener(
     event,
     handler._withTask || handler,
@@ -69,6 +94,11 @@ function remove (
   )
 }
 
+/**
+ * 更新dom事件列表
+ * @param oldVnode
+ * @param vnode
+ */
 function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (isUndef(oldVnode.data.on) && isUndef(vnode.data.on)) {
     return
@@ -81,6 +111,7 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   target = undefined
 }
 
+// 导出，创建和更新
 export default {
   create: updateDOMListeners,
   update: updateDOMListeners

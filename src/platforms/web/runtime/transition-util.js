@@ -1,4 +1,5 @@
 /* @flow */
+// css 过渡效果函数
 
 import { inBrowser, isIE9 } from 'core/util/index'
 import { addClass, removeClass } from './class-util'
@@ -21,6 +22,7 @@ export function resolveTransition (def?: string | Object): ?Object {
   }
 }
 
+// 自动css 过渡效果
 const autoCssTransition: (name: string) => Object = cached(name => {
   return {
     enterClass: `${name}-enter`,

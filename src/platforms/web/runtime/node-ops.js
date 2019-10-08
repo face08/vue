@@ -1,4 +1,5 @@
 /* @flow */
+// 原生节点操作函数
 
 import { namespaceMap } from 'web/util/index'
 

@@ -2,6 +2,7 @@ import type { Config } from '../src/core/config'
 import type VNode from '../src/core/vdom/vnode'
 import type Watcher from '../src/core/observer/watcher'
 
+// 组件
 declare interface Component {
   // constructor information
   static cid: number;
@@ -44,13 +45,13 @@ declare interface Component {
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;
   $on: (event: string | Array<string>, fn: Function) => Component;
   $once: (event: string, fn: Function) => Component;
-  $off: (event?: string | Array<string>, fn?: Function) => Component;
+  $off: (event?: string | Array<string>, fn?: Function) => Component; // 移除事件
   $emit: (event: string, ...args: Array<mixed>) => Component;
   $nextTick: (fn: Function) => void | Promise<*>;
   $createElement: (tag?: string | Component, data?: Object, children?: VNodeChildren) => VNode;
 
-  // private properties
-  _uid: number | string;
+  // private properties 私有属性
+  _uid: number | string;  // 从0开始
   _name: string; // this only exists in dev mode
   _isVue: true;
   _self: Component;
@@ -66,16 +67,16 @@ declare interface Component {
   _directInactive: boolean;
   _isMounted: boolean;
   _isDestroyed: boolean;
-  _isBeingDestroyed: boolean;
+  _isBeingDestroyed: boolean;// 准备销毁中
   _vnode: ?VNode; // self root node
   _staticTrees: ?Array<VNode>; // v-once cached trees
   _hasHookEvent: boolean;
   _provided: ?Object;
   // _virtualComponents?: { [key: string]: Component };
 
-  // private methods
+  // private methods 私有函数==========
 
-  // lifecycle
+  // lifecycle 生命周期函数
   _init: Function;
   _mount: (el?: Element | void, hydrating?: boolean) => Component;
   _update: (vnode: VNode, hydrating?: boolean) => void;

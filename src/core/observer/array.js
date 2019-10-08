@@ -19,15 +19,16 @@ const methodsToPatch = [
 ]
 
 /**
+ * 拦截数组函数，添加事件拦截
  * Intercept mutating methods and emit events
  */
 methodsToPatch.forEach(function (method) {
-  // cache original method
+  // 缓存原始函数：cache original method
   const original = arrayProto[method]
   def(arrayMethods, method, function mutator (...args) {
     const result = original.apply(this, args)
-    const ob = this.__ob__
-    let inserted
+    const ob = this.__ob__  // todo 什么时候添加的该属性
+    let inserted  // 插入的值
     switch (method) {
       case 'push':
       case 'unshift':
@@ -39,7 +40,7 @@ methodsToPatch.forEach(function (method) {
     }
     if (inserted) ob.observeArray(inserted)
     // notify change
-    ob.dep.notify()
+    ob.dep.notify() // 通知修改
     return result
   })
 })

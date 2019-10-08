@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>teat</title>
+  <script src="../../dist/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  <div>{{name}}</div>
+  <my-input value="book"></my-input>
+  <anchored-heading :level="1">Hello world!</anchored-heading>
+</div>
+
+<script>
+
+  Vue.component('my-input', {
+    props: ['value'],
+    render: function (createElement) {
+      var self = this
+      return createElement('input', {
+        domProps: {
+          value: self.value
+        },
+        on: {
+          input: function (event) {
+            self.$emit('input', event.target.value)
+          }
+        }
+      })
+    }
+  })
+
+  Vue.component('anchored-heading', {
+    render: function (createElement) {
+      return createElement(
+        'h' + this.level,   // 标签名称
+        this.$slots.default, // 子节点数组
+      )
+    },
+    props: {
+      level: {
+        type: Number,
+        required: true
+      }
+    }
+  })
+
+  // 参数：options
+  var vm = new Vue({
+    el: '#app',
+    data: {
+      name: 'hello vue',
+    },
+  });
+
+</script>
+</body>
+</html>

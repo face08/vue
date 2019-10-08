@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>test</title>
+  <script src="../../dist/vue.js"></script>
+</head>
+<body>
+<div id="example-1">
+  <h1>数组</h1>
+  <ul>
+    <li v-for="(item, index) in items">
+      {{ parentMessage }} - {{ index }} - {{ item.message }}
+    </li>
+  </ul>
+  <h1>对象</h1>
+  <div v-for="(value, name, index) in object">
+    {{ index }}. {{ name }}: {{ value }}
+  </div>
+  <h1> 指令 </h1>
+  <input v-model="msg" :type="uType">选我
+  <div v-html="vHtml"></div>
+  <div v-text="vText"></div>
+  <button v-on:click="onClick">Add 1</button>
+  <div
+    class="static"
+    v-bind:class="{ active: isActive, 'text-danger': hasError }">测试class
+  </div>
+  <div style="background: #333;" v-bind:style="styleObject">测试style</div>
+  <span style="color: #40a44e;" v-pre>{{ this will not be compiled }}</span>
+</div>
+
+
+<script>
+
+  var example1 = new Vue({
+    el: '#example-1',
+    data: {
+      vText: '我=={}',
+      uType: 'checkbox',
+      msg: 'hi,model',
+      vHtml: 'Using v-html directive: <span style="color: red">This should be red.</span>',
+      isActive: true,
+      hasError: false,
+      parentMessage: 'Parent',
+      styleObject: {
+        color: 'red',
+        fontSize: '13px'
+      },
+      items: [
+        {message: 'Foo'},
+        {message: 'Bar'}
+      ],
+      object: {
+        title: 'How to do lists in Vue',
+        author: 'Jane Doe',
+        publishedAt: '2016-04-10'
+      }
+    },
+    methods: {
+      onClick: function () {
+        console.log('onclick')
+      }
+    }
+  })
+</script>
+</body>
+</html>

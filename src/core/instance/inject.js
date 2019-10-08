@@ -1,9 +1,10 @@
 /* @flow */
-
+// 依赖注入：provide / inject：  https://cn.vuejs.org/v2/api/#provide-inject
 import { hasOwn } from 'shared/util'
 import { warn, hasSymbol } from '../util/index'
 import { defineReactive, toggleObserving } from '../observer/index'
 
+// 初始化Provide
 export function initProvide (vm: Component) {
   const provide = vm.$options.provide
   if (provide) {
@@ -13,8 +14,10 @@ export function initProvide (vm: Component) {
   }
 }
 
+// 初始化inject
 export function initInjections (vm: Component) {
   const result = resolveInject(vm.$options.inject, vm)
+  // 添加响应式
   if (result) {
     toggleObserving(false)
     Object.keys(result).forEach(key => {
@@ -36,9 +39,16 @@ export function initInjections (vm: Component) {
   }
 }
 
+/**
+ * 逐级向上查找父容器，找到key对应的内容
+ * @param inject
+ * @param vm
+ * @returns {*}
+ */
 export function resolveInject (inject: any, vm: Component): ?Object {
   if (inject) {
     // inject is :any because flow is not smart enough to figure out cached
+    // 查找到的结果
     const result = Object.create(null)
     const keys = hasSymbol
       ? Reflect.ownKeys(inject).filter(key => {
@@ -47,10 +57,12 @@ export function resolveInject (inject: any, vm: Component): ?Object {
       })
       : Object.keys(inject)
 
+    // 循环key
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
       const provideKey = inject[key].from
       let source = vm
+      // 遍历父容器
       while (source) {
         if (source._provided && hasOwn(source._provided, provideKey)) {
           result[key] = source._provided[provideKey]

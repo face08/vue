@@ -1,5 +1,5 @@
 /* @flow */
-
+// 生成代码，一系列genXXX函数
 import { genHandlers } from './events'
 import baseDirectives from '../directives/index'
 import { camelize, no, extend } from 'shared/util'
@@ -19,6 +19,10 @@ export class CodegenState {
   onceId: number;
   staticRenderFns: Array<string>;
 
+  /**
+   *
+    * @param options 编译选项
+   */
   constructor (options: CompilerOptions) {
     this.options = options
     this.warn = options.warn || baseWarn
@@ -31,24 +35,39 @@ export class CodegenState {
     this.staticRenderFns = []
   }
 }
+// 类结束
 
+// 生成代码数据结构
 export type CodegenResult = {
   render: string,
   staticRenderFns: Array<string>
 };
 
+/**
+ * mark 生成代码入口
+ * @param ast
+ * @param options
+ * @returns {{staticRenderFns: Array<string>, render: string}}
+ */
 export function generate (
   ast: ASTElement | void,
   options: CompilerOptions
 ): CodegenResult {
   const state = new CodegenState(options)
   const code = ast ? genElement(ast, state) : '_c("div")'
+  // 返回生成的代码
   return {
     render: `with(this){return ${code}}`,
     staticRenderFns: state.staticRenderFns
   }
 }
 
+/**
+ * 生成element
+ * @param el
+ * @param state
+ * @returns {string|(string|void|string)|*}
+ */
 export function genElement (el: ASTElement, state: CodegenState): string {
   if (el.staticRoot && !el.staticProcessed) {
     return genStatic(el, state)
@@ -66,6 +85,7 @@ export function genElement (el: ASTElement, state: CodegenState): string {
     // component or element
     let code
     if (el.component) {
+      // 注释
       code = genComponent(el.component, el, state)
     } else {
       const data = el.plain ? undefined : genData(el, state)

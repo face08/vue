@@ -1,6 +1,7 @@
 /**
  * Not type-checking this file because it's mostly vendor code.
  */
+// 解析html，参考：simplehtmlparser.js
 
 /*!
  * HTML Parser By John Resig (ejohn.org)
@@ -12,6 +13,7 @@
 import { makeMap, no } from 'shared/util'
 import { isNonPhrasingTag } from 'web/compiler/util'
 
+// 解析模板的正则表达式
 // Regular Expressions for parsing tags and attributes
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
 // could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
@@ -31,7 +33,7 @@ let IS_REGEX_CAPTURING_BROKEN = false
   IS_REGEX_CAPTURING_BROKEN = g === ''
 })
 
-// Special Elements (can contain anything)
+// 特殊标签：Special Elements (can contain anything)
 export const isPlainTextElement = makeMap('script,style,textarea', true)
 const reCache = {}
 
@@ -55,20 +57,27 @@ function decodeAttr (value, shouldDecodeNewlines) {
   return value.replace(re, match => decodingMap[match])
 }
 
+/**
+ *  解析模板，然后回调到options 提供的回调函数:start,end,chars,comment等等
+ * @param html 要编译的模板
+ * @param options 编译的参数
+ */
 export function parseHTML (html, options) {
-  const stack = []
+  const stack = []  // 元素堆栈
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
   const canBeLeftOpenTag = options.canBeLeftOpenTag || no
   let index = 0
   let last, lastTag
+
+  // 开启while循环
   while (html) {
     last = html
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
-      let textEnd = html.indexOf('<')
+      let textEnd = html.indexOf('<') // < 字符的位置
       if (textEnd === 0) {
-        // Comment:
+        // 检查：Comment是否注释
         if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
 
@@ -81,6 +90,7 @@ export function parseHTML (html, options) {
           }
         }
 
+        // 检查：<！[if！IE]>
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
         if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
@@ -91,14 +101,14 @@ export function parseHTML (html, options) {
           }
         }
 
-        // Doctype:
+        // 检查：Doctype:
         const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
           advance(doctypeMatch[0].length)
           continue
         }
 
-        // End tag:
+        // 检查：结束标签  End tag:
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           const curIndex = index
@@ -107,7 +117,7 @@ export function parseHTML (html, options) {
           continue
         }
 
-        // Start tag:
+        // 检查：开始标签  Start tag:
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
           handleStartTag(startTagMatch)
@@ -117,6 +127,7 @@ export function parseHTML (html, options) {
           continue
         }
       }
+      //如果<不是位置不是0
 
       let text, rest, next
       if (textEnd >= 0) {
@@ -142,10 +153,13 @@ export function parseHTML (html, options) {
         html = ''
       }
 
+      // 处理字符
       if (options.chars && text) {
         options.chars(text)
       }
     } else {
+      // if判断!lastTag结束
+
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
       const reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'))
@@ -159,6 +173,7 @@ export function parseHTML (html, options) {
         if (shouldIgnoreFirstNewline(stackedTag, text)) {
           text = text.slice(1)
         }
+        // 处理字符
         if (options.chars) {
           options.chars(text)
         }
@@ -168,7 +183,9 @@ export function parseHTML (html, options) {
       html = rest
       parseEndTag(stackedTag, index - endTagLength, index)
     }
+    // ===========else结束
 
+    // ？？
     if (html === last) {
       options.chars && options.chars(html)
       if (process.env.NODE_ENV !== 'production' && !stack.length && options.warn) {
@@ -178,28 +195,45 @@ export function parseHTML (html, options) {
     }
   }
 
+  // ===============while 结束
+
+
   // Clean up any remaining tags
   parseEndTag()
 
+
+  // =================下面定义函数===============
+
+
+  // 前进多少字符
   function advance (n) {
     index += n
     html = html.substring(n)
   }
 
+  /**
+   * 解析开始tag
+   * @returns {{start: number, tagName: *, attrs: Array}}
+   */
   function parseStartTag () {
     const start = html.match(startTagOpen)
     if (start) {
+      // 匹配到的元素
       const match = {
         tagName: start[1],
         attrs: [],
         start: index
       }
       advance(start[0].length)
+
+      // 解析属性
       let end, attr
       while (!(end = html.match(startTagClose)) && (attr = html.match(attribute))) {
         advance(attr[0].length)
         match.attrs.push(attr)
       }
+
+      // 解析结尾
       if (end) {
         match.unarySlash = end[1]
         advance(end[0].length)
@@ -209,6 +243,10 @@ export function parseHTML (html, options) {
     }
   }
 
+  /**
+   * 处理开始tag
+   * @param match
+   */
   function handleStartTag (match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
@@ -225,7 +263,8 @@ export function parseHTML (html, options) {
     const unary = isUnaryTag(tagName) || !!unarySlash
 
     const l = match.attrs.length
-    const attrs = new Array(l)
+    const attrs = new Array(l)  // tab的属性
+    // 循环属性
     for (let i = 0; i < l; i++) {
       const args = match.attrs[i]
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
@@ -244,16 +283,24 @@ export function parseHTML (html, options) {
       }
     }
 
+    // 存入堆栈
     if (!unary) {
       stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs })
       lastTag = tagName
     }
 
+    // 处理开始
     if (options.start) {
       options.start(tagName, attrs, unary, match.start, match.end)
     }
   }
 
+  /**
+   * 解析结束tag
+    * @param tagName
+   * @param start
+   * @param end
+   */
   function parseEndTag (tagName, start, end) {
     let pos, lowerCasedTagName
     if (start == null) start = index
@@ -263,7 +310,7 @@ export function parseHTML (html, options) {
       lowerCasedTagName = tagName.toLowerCase()
     }
 
-    // Find the closest opened tag of the same type
+    // 堆栈里查找匹配的tag：Find the closest opened tag of the same type
     if (tagName) {
       for (pos = stack.length - 1; pos >= 0; pos--) {
         if (stack[pos].lowerCasedTag === lowerCasedTagName) {
@@ -282,18 +329,21 @@ export function parseHTML (html, options) {
           (i > pos || !tagName) &&
           options.warn
         ) {
+          // 匹配不到时，警告错误
           options.warn(
             `tag <${stack[i].tag}> has no matching end tag.`
           )
         }
         if (options.end) {
-          options.end(stack[i].tag, start, end)
+          options.end(stack[i].tag, start, end) // 开始处理
         }
       }
 
-      // Remove the open elements from the stack
+      // 移除匹配到的标签：Remove the open elements from the stack
       stack.length = pos
       lastTag = pos && stack[pos - 1].tag
+
+      // if结束
     } else if (lowerCasedTagName === 'br') {
       if (options.start) {
         options.start(tagName, [], true, start, end)

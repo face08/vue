@@ -1,4 +1,5 @@
 /* @flow */
+// 指令：v-bind
 
 export default function bind (el: ASTElement, dir: ASTDirective) {
   el.wrapData = (code: string) => {

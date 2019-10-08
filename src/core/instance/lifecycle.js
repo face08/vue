@@ -21,10 +21,12 @@ import {
 export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false
 
+// 初始化声明周期功能
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
   // locate first non-abstract parent
+  // 抽象组价，比如<transition>, <keep-alive> https://vuejs.org/v2/api/#keep-alive
   let parent = options.parent
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {
@@ -47,7 +49,10 @@ export function initLifecycle (vm: Component) {
   vm._isBeingDestroyed = false
 }
 
+// 混入生命周期功能函数:$forceUpdate、$destroy；（$nextTick，$mount）？？
+// https://vuejs.org/v2/api/#vm-mount
 export function lifecycleMixin (Vue: Class<Component>) {
+
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
@@ -55,6 +60,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const prevActiveInstance = activeInstance
     activeInstance = vm
     vm._vnode = vnode
+
+    // 更新节点
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
@@ -65,14 +72,15 @@ export function lifecycleMixin (Vue: Class<Component>) {
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     activeInstance = prevActiveInstance
-    // update __vue__ reference
+
+    // 更新__vue__引用
     if (prevEl) {
       prevEl.__vue__ = null
     }
     if (vm.$el) {
       vm.$el.__vue__ = vm
     }
-    // if parent is an HOC, update its $el as well
+    // if parent is an HOC, update its $el as well：如果是高级组价
     if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
       vm.$parent.$el = vm.$el
     }
@@ -80,6 +88,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // updated in a parent's updated hook.
   }
 
+  // 强制更新
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
     if (vm._watcher) {
@@ -87,19 +96,20 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
   }
 
+  // 销毁函数 比如v-if控制，销毁后做清理工作
   Vue.prototype.$destroy = function () {
     const vm: Component = this
     if (vm._isBeingDestroyed) {
       return
     }
-    callHook(vm, 'beforeDestroy')
+    callHook(vm, 'beforeDestroy') // mark 生命周期函数调用：beforeDestroy
     vm._isBeingDestroyed = true
     // remove self from parent
     const parent = vm.$parent
     if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm)
     }
-    // teardown watchers
+    // teardown watchers:拆解掉watchers
     if (vm._watcher) {
       vm._watcher.teardown()
     }
@@ -117,7 +127,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // invoke destroy hooks on current rendered tree
     vm.__patch__(vm._vnode, null)
     // fire destroyed hook
-    callHook(vm, 'destroyed')
+    callHook(vm, 'destroyed') // 声明周期函数调用：destroyed
     // turn off all instance listeners.
     vm.$off()
     // remove __vue__ reference
@@ -131,6 +141,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// $mount 编译完毕后，挂载时候调用
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -157,7 +168,7 @@ export function mountComponent (
       }
     }
   }
-  callHook(vm, 'beforeMount')
+  callHook(vm, 'beforeMount') // mark 生命周期函数：beforeMount
 
   let updateComponent
   /* istanbul ignore if */
@@ -180,7 +191,7 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
-      vm._update(vm._render(), hydrating)
+      vm._update(vm._render(), hydrating) // 更新组件？
     }
   }
 
@@ -190,7 +201,7 @@ export function mountComponent (
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted) {
-        callHook(vm, 'beforeUpdate')
+        callHook(vm, 'beforeUpdate')  // mark 生命周期函数
       }
     }
   }, true /* isRenderWatcher */)
@@ -200,7 +211,7 @@ export function mountComponent (
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
     vm._isMounted = true
-    callHook(vm, 'mounted')
+    callHook(vm, 'mounted') // mark 生命周期函数
   }
   return vm
 }
@@ -292,7 +303,7 @@ export function activateChildComponent (vm: Component, direct?: boolean) {
     for (let i = 0; i < vm.$children.length; i++) {
       activateChildComponent(vm.$children[i])
     }
-    callHook(vm, 'activated')
+    callHook(vm, 'activated')  // mark 生命周期函数
   }
 }
 
@@ -308,15 +319,14 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
     for (let i = 0; i < vm.$children.length; i++) {
       deactivateChildComponent(vm.$children[i])
     }
-    callHook(vm, 'deactivated')
+    callHook(vm, 'deactivated') // mark 生命周期函数
   }
 }
-
-// 调用hook声明周期函数
+// mark 调用hook声明周期函数
 export function callHook (vm: Component, hook: string) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
-  const handlers = vm.$options[hook]
+  const handlers = vm.$options[hook] // 回调数组
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
       try {

@@ -1,4 +1,5 @@
 /* @flow */
+// css 的 class 处理函数，主要使用classList属性，实现增、删、改、查
 
 /**
  * Add class with compatibility for SVG since classList is not supported on

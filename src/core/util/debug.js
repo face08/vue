@@ -1,8 +1,12 @@
 /* @flow */
 
+/**
+ * 调试用的，生产环境移除
+ */
 import config from '../config'
 import { noop } from 'shared/util'
 
+// noop 空函数
 export let warn = noop
 export let tip = noop
 export let generateComponentTrace = (noop: any) // work around flow check
@@ -11,13 +15,21 @@ export let formatComponentName = (noop: any)
 if (process.env.NODE_ENV !== 'production') {
   const hasConsole = typeof console !== 'undefined'
   const classifyRE = /(?:^|[-_])(\w)/g
+
+  // 替换为一个大写字母，然后移除连接符和下划线。例如，“this_is-an_example” 将会替换为 “ThisIsAnExample”。
   const classify = str => str
     .replace(classifyRE, c => c.toUpperCase())
     .replace(/[-_]/g, '')
 
+  /**
+   * 处理警告信息
+   * @param msg
+   * @param vm vue实例
+   */
   warn = (msg, vm) => {
     const trace = vm ? generateComponentTrace(vm) : ''
 
+    // 如果有设置钩子函数
     if (config.warnHandler) {
       config.warnHandler.call(null, msg, vm, trace)
     } else if (hasConsole && (!config.silent)) {
@@ -65,6 +77,12 @@ if (process.env.NODE_ENV !== 'production') {
     return res
   }
 
+  /**
+   * 包含错误日志的组件层次追踪器
+   * https://ohhoney1.github.io/Vue.js-Source-Code-line-by-line/12-the-generateComponentTrace-function-1.html
+   * @param vm vue实例
+   * @returns {string}
+   */
   generateComponentTrace = vm => {
     if (vm._isVue && vm.$parent) {
       const tree = []

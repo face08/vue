@@ -20,6 +20,11 @@ import {
   removeTransitionClass
 } from '../transition-util'
 
+/**
+ * css 过渡效果，进入
+ * @param vnode
+ * @param toggleDisplay
+ */
 export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const el: any = vnode.elm
 

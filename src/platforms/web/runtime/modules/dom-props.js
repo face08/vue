@@ -2,6 +2,11 @@
 
 import { isDef, isUndef, extend, toNumber } from 'shared/util'
 
+/**
+ * 更新dom属性
+ * @param oldVnode
+ * @param vnode
+ */
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (isUndef(oldVnode.data.domProps) && isUndef(vnode.data.domProps)) {
     return
@@ -15,11 +20,14 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     props = vnode.data.domProps = extend({}, props)
   }
 
+  // 旧的重置
   for (key in oldProps) {
     if (isUndef(props[key])) {
       elm[key] = ''
     }
   }
+
+  // 新的添加
   for (key in props) {
     cur = props[key]
     // ignore children if the node has textContent or innerHTML,
@@ -36,6 +44,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     }
 
     if (key === 'value') {
+      // 如果属性时value
       // store value as _value as well since
       // non-string values will be stringified
       elm._value = cur
@@ -61,6 +70,12 @@ function shouldUpdateValue (elm: acceptValueElm, checkVal: string): boolean {
   ))
 }
 
+/**
+ * 没有在焦点上，并且数据不脏
+ * @param elm
+ * @param checkVal
+ * @returns {boolean}
+ */
 function isNotInFocusAndDirty (elm: acceptValueElm, checkVal: string): boolean {
   // return true when textbox (.number and .trim) loses focus and its value is
   // not equal to the updated value
@@ -71,8 +86,16 @@ function isNotInFocusAndDirty (elm: acceptValueElm, checkVal: string): boolean {
   return notInFocus && elm.value !== checkVal
 }
 
+/**
+ * 有装饰符，且数据已脏
+ * @param elm
+ * @param newVal
+ * @returns {boolean}
+ */
 function isDirtyWithModifiers (elm: any, newVal: string): boolean {
   const value = elm.value
+
+  // 根据装饰符转换
   const modifiers = elm._vModifiers // injected by v-model runtime
   if (isDef(modifiers)) {
     if (modifiers.lazy) {
@@ -86,6 +109,8 @@ function isDirtyWithModifiers (elm: any, newVal: string): boolean {
       return value.trim() !== newVal.trim()
     }
   }
+
+  // 数据是否脏
   return value !== newVal
 }
 

@@ -22,6 +22,7 @@ if (isIE9) {
 const directive = {
   inserted (el, binding, vnode, oldVnode) {
     if (vnode.tag === 'select') {
+      // case：select
       // #6903
       if (oldVnode.elm && !oldVnode.elm._vOptions) {
         mergeVNodeHook(vnode, 'postpatch', () => {
@@ -32,6 +33,7 @@ const directive = {
       }
       el._vOptions = [].map.call(el.options, getValue)
     } else if (vnode.tag === 'textarea' || isTextInputType(el.type)) {
+      // case：textarea
       el._vModifiers = binding.modifiers
       if (!binding.modifiers.lazy) {
         el.addEventListener('compositionstart', onCompositionStart)
@@ -127,10 +129,12 @@ function getValue (option) {
     : option.value
 }
 
+// Composition开始
 function onCompositionStart (e) {
   e.target.composing = true
 }
 
+// Composition结束
 function onCompositionEnd (e) {
   // prevent triggering an input event for no reason
   if (!e.target.composing) return
@@ -138,6 +142,7 @@ function onCompositionEnd (e) {
   trigger(e.target, 'input')
 }
 
+// 模拟发送事件
 function trigger (el, type) {
   const e = document.createEvent('HTMLEvents')
   e.initEvent(type, true, true)

@@ -3,6 +3,7 @@
 import { cached } from 'shared/util'
 import { parseFilters } from './filter-parser'
 
+// 3个正则表达式
 const defaultTagRE = /\{\{((?:.|\n)+?)\}\}/g
 const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
 
@@ -12,11 +13,18 @@ const buildRegex = cached(delimiters => {
   return new RegExp(open + '((?:.|\\n)+?)' + close, 'g')
 })
 
+// 自定义文本解析类型
 type TextParseResult = {
   expression: string,
   tokens: Array<string | { '@binding': string }>
 }
 
+/**
+ * 解析文本，有什么特别的地方？？
+ * @param text
+ * @param delimiters
+ * @returns {{expression: string, tokens: Array}}
+ */
 export function parseText (
   text: string,
   delimiters?: [string, string]

@@ -8,6 +8,7 @@ type CompiledFunctionResult = {
   staticRenderFns: Array<Function>;
 };
 
+// mark 创建函数
 function createFunction (code, errors) {
   try {
     return new Function(code)
@@ -20,6 +21,11 @@ function createFunction (code, errors) {
 export function createCompileToFunctionFn (compile: Function): Function {
   const cache = Object.create(null)
 
+  /**
+   * @template  模板字符串
+   * @options   编译参数
+   * @vm        vm实例
+   */
   return function compileToFunctions (
     template: string,
     options?: CompilerOptions,
@@ -55,7 +61,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       return cache[key]
     }
 
-    // compile
+    // compile：编译
     const compiled = compile(template, options)
 
     // check compilation errors/tips
@@ -93,7 +99,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
         )
       }
     }
-
+    // 缓存 编译结果
     return (cache[key] = res)
   }
 }

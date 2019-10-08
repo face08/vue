@@ -1,5 +1,7 @@
 /* @flow */
-
+/**
+ * 组件props相关
+ */
 import { warn } from './debug'
 import { observe, toggleObserving, shouldObserve } from '../observer/index'
 import {
@@ -11,13 +13,21 @@ import {
   isPlainObject
 } from 'shared/util'
 
+// props 属性数据结构
 type PropOptions = {
   type: Function | Array<Function> | null,
   default: any,
   required: ?boolean,
-  validator: ?Function
+  validator: ?Function  // 自定义验证函数
 };
 
+/**
+ * 验证组件参数中的prop
+ * 获取默认值,observe默认值,验证默认值合法性,最终返回默认值
+ * key            验证的prop name
+ * propOptions    规范化后的传入props参数
+ * propsData      父组件传递到子组件上的数据
+ */
 export function validateProp (
   key: string,
   propOptions: Object,
@@ -29,6 +39,7 @@ export function validateProp (
   let value = propsData[key]
   // boolean casting
   const booleanIndex = getTypeIndex(Boolean, prop.type)
+  // 如果查找到boolean的索引
   if (booleanIndex > -1) {
     if (absent && !hasOwn(prop, 'default')) {
       value = false
@@ -95,6 +106,7 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
 }
 
 /**
+ * 断言prop是否是可用
  * Assert whether a prop is valid.
  */
 function assertProp (
@@ -148,12 +160,14 @@ function assertProp (
 
 const simpleCheckRE = /^(String|Number|Boolean|Function|Symbol)$/
 
+// 断言prop的类型type
 function assertType (value: any, type: Function): {
   valid: boolean;
   expectedType: string;
 } {
   let valid
   const expectedType = getType(type)
+  // 是否简单数据类型
   if (simpleCheckRE.test(expectedType)) {
     const t = typeof value
     valid = t === expectedType.toLowerCase()
@@ -175,6 +189,7 @@ function assertType (value: any, type: Function): {
 }
 
 /**
+ * 获取fn类型
  * Use function string name to check built-in types,
  * because a simple equality check will fail when running
  * across different vms / iframes.
@@ -184,14 +199,18 @@ function getType (fn) {
   return match ? match[1] : ''
 }
 
+// a、b类型是否相等
 function isSameType (a, b) {
   return getType(a) === getType(b)
 }
 
+// 匹配类型索引
 function getTypeIndex (type, expectedTypes): number {
+  // 如果不是数组
   if (!Array.isArray(expectedTypes)) {
     return isSameType(expectedTypes, type) ? 0 : -1
   }
+  // 如果是数组，查找匹配的index
   for (let i = 0, len = expectedTypes.length; i < len; i++) {
     if (isSameType(expectedTypes[i], type)) {
       return i

@@ -49,10 +49,10 @@ function pruneCacheEntry (
 }
 
 const patternTypes: Array<Function> = [String, RegExp, Array]
-
+// 文档：https://cn.vuejs.org/v2/guide/components-dynamic-async.html#%E5%9C%A8%E5%8A%A8%E6%80%81%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BD%BF%E7%94%A8-keep-alive
 export default {
   name: 'keep-alive',
-  abstract: true,
+  abstract: true, // 抽象
 
   props: {
     include: patternTypes,

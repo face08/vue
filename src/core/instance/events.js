@@ -1,4 +1,5 @@
 /* @flow */
+// 事件相关功能 https://vuejs.org/v2/api/#Instance-Methods-Events
 
 import {
   tip,
@@ -9,9 +10,10 @@ import {
 } from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
 
+// 初始化
 export function initEvents (vm: Component) {
-  vm._events = Object.create(null)
-  vm._hasHookEvent = false
+  vm._events = Object.create(null)  // 事件存贮：["type"]=[fun,fun...]
+  vm._hasHookEvent = false  //
   // init parent attached events
   const listeners = vm.$options._parentListeners
   if (listeners) {
@@ -44,6 +46,13 @@ export function updateComponentListeners (
 }
 
 // 添加事件相关函数
+/**
+ * 混入事件相互功能函数：$on、$once、$off、$emit
+ * 其实就是数组保存回调函数，然后查找调用
+ * 注意v-on:click 不在这里
+ * https://vuejs.org/v2/api/#Instance-Methods-Events
+ * @param Vue
+ */
 export function eventsMixin (Vue: Class<Component>) {
   const hookRE = /^hook:/
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
@@ -53,6 +62,7 @@ export function eventsMixin (Vue: Class<Component>) {
         this.$on(event[i], fn)
       }
     } else {
+      // 创建数组，存储回调
       (vm._events[event] || (vm._events[event] = [])).push(fn)
       // optimize hook:event cost by using a boolean flag marked at registration
       // instead of a hash lookup

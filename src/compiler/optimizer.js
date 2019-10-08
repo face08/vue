@@ -1,4 +1,5 @@
 /* @flow */
+// 优化
 
 import { makeMap, isBuiltInTag, cached, no } from 'shared/util'
 
@@ -20,7 +21,7 @@ const genStaticKeysCached = cached(genStaticKeys)
  */
 export function optimize (root: ?ASTElement, options: CompilerOptions) {
   if (!root) return
-  isStaticKey = genStaticKeysCached(options.staticKeys || '')
+  isStaticKey = genStaticKeysCached(options.staticKeys || '') // options.staticKeys :"staticClass,staticStyle"
   isPlatformReservedTag = options.isReservedTag || no
   // first pass: mark all non-static nodes.
   markStatic(root)
@@ -35,8 +36,9 @@ function genStaticKeys (keys: string): Function {
   )
 }
 
+// 标记非静态节点
 function markStatic (node: ASTNode) {
-  node.static = isStatic(node)
+  node.static = isStatic(node) // 是否静态元素
   if (node.type === 1) {
     // do not make component slot content static. this avoids
     // 1. components not able to mutate slot nodes
@@ -48,6 +50,8 @@ function markStatic (node: ASTNode) {
     ) {
       return
     }
+
+    // 遍历子元素
     for (let i = 0, l = node.children.length; i < l; i++) {
       const child = node.children[i]
       markStatic(child)
@@ -55,6 +59,7 @@ function markStatic (node: ASTNode) {
         node.static = false
       }
     }
+    // 判断 if条件
     if (node.ifConditions) {
       for (let i = 1, l = node.ifConditions.length; i < l; i++) {
         const block = node.ifConditions[i].block
@@ -67,6 +72,7 @@ function markStatic (node: ASTNode) {
   }
 }
 
+// 标记静态root节点
 function markStaticRoots (node: ASTNode, isInFor: boolean) {
   if (node.type === 1) {
     if (node.static || node.once) {
@@ -97,6 +103,7 @@ function markStaticRoots (node: ASTNode, isInFor: boolean) {
   }
 }
 
+// mark 是否静态的
 function isStatic (node: ASTNode): boolean {
   if (node.type === 2) { // expression
     return false

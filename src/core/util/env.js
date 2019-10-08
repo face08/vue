@@ -1,8 +1,12 @@
 /* @flow */
 
+/**
+ * 环境变量判断
+ */
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
 
+// 浏览器环境变量
 // Browser environment sniffing
 export const inBrowser = typeof window !== 'undefined'
 export const inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform
@@ -15,9 +19,10 @@ export const isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 
 export const isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios')
 export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
 
-// Firefox has a "watch" function on Object.prototype...
+// 原生watch：Firefox has a "watch" function on Object.prototype...
 export const nativeWatch = ({}).watch
 
+// 是否支持passive：passive 为 true 来明确告诉浏览器，事件处理程序不会调用 preventDefault 来阻止默认滑动行为。
 export let supportsPassive = false
 if (inBrowser) {
   try {
@@ -32,6 +37,7 @@ if (inBrowser) {
   } catch (e) {}
 }
 
+// 是否服务器渲染模式
 // this needs to be lazy-evaled because vue may be required before
 // vue-server-renderer can set VUE_ENV
 let _isServer
@@ -52,15 +58,18 @@ export const isServerRendering = () => {
 // detect devtools
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
+// 是否原生函数
 /* istanbul ignore next */
 export function isNative (Ctor: any): boolean {
   return typeof Ctor === 'function' && /native code/.test(Ctor.toString())
 }
 
+// 是否支持symbol
 export const hasSymbol =
   typeof Symbol !== 'undefined' && isNative(Symbol) &&
   typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)
 
+// 自定义set：如果有set则用，没有，使用自定义
 let _Set
 /* istanbul ignore if */ // $flow-disable-line
 if (typeof Set !== 'undefined' && isNative(Set)) {

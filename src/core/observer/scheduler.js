@@ -1,4 +1,5 @@
 /* @flow */
+// 调度程序
 
 import type Watcher from './watcher'
 import config from '../config'
@@ -12,15 +13,16 @@ import {
 
 export const MAX_UPDATE_COUNT = 100
 
-const queue: Array<Watcher> = []
-const activatedChildren: Array<Component> = []
-let has: { [key: number]: ?true } = {}
+const queue: Array<Watcher> = []  // watcher队列
+const activatedChildren: Array<Component> = []  // activated队列
+let has: { [key: number]: ?true } = {}  // id是否存在
 let circular: { [key: number]: number } = {}
-let waiting = false
-let flushing = false
+let waiting = false //等待执行
+let flushing = false  // 执行中
 let index = 0
 
 /**
+ * 重置调度程序状态
  * Reset the scheduler's state.
  */
 function resetSchedulerState () {
@@ -33,11 +35,16 @@ function resetSchedulerState () {
 }
 
 /**
+ * 刷新队列并运行观察者。
  * Flush both queues and run the watchers.
  */
 function flushSchedulerQueue () {
   flushing = true
   let watcher, id
+  // 按照id排序，在刷新前排序队列，原因：
+  // 1、组件都是先更新父组件，然后是子组件。父组件总是比子组件早创建。
+  // 2、组件用户watcher总是比render watcher早执行，因为userWatcher总是比render Watcher早创建。
+  // 3、如果一个组件在父watcher在执行的时候被销毁，那么他的watcher也会被强制停止。
 
   // Sort queue before flush.
   // This ensures that:
@@ -49,6 +56,7 @@ function flushSchedulerQueue () {
   //    its watchers can be skipped.
   queue.sort((a, b) => a.id - b.id)
 
+  // 不缓存长度，是因为会有更多的watcher加入队列，好像我们执行已经存在的watchers
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
   for (index = 0; index < queue.length; index++) {
@@ -93,6 +101,7 @@ function flushSchedulerQueue () {
   }
 }
 
+// mark 生命周期函数：updated
 function callUpdatedHooks (queue) {
   let i = queue.length
   while (i--) {
@@ -123,6 +132,7 @@ function callActivatedHooks (queue) {
 }
 
 /**
+ * 把一个watcher放在队列中，拥有相同的ID的任务将会被停止，除非当队列正在flush的加入的。
  * Push a watcher into the watcher queue.
  * Jobs with duplicate IDs will be skipped unless it's
  * pushed when the queue is being flushed.
@@ -134,6 +144,8 @@ export function queueWatcher (watcher: Watcher) {
     if (!flushing) {
       queue.push(watcher)
     } else {
+      // 如果已经在刷新，把watcher加入的队列中，并从小到大排列，
+      // 如果flush的时候，id比他大的都已经执行，他会被立即执行
       // if already flushing, splice the watcher based on its id
       // if already past its id, it will be run next immediately.
       let i = queue.length - 1
@@ -150,7 +162,7 @@ export function queueWatcher (watcher: Watcher) {
         flushSchedulerQueue()
         return
       }
-      nextTick(flushSchedulerQueue)
+      nextTick(flushSchedulerQueue) // mark 下一帧执行更新
     }
   }
 }

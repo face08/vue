@@ -8,6 +8,7 @@ declare type InternalComponentOptions = {
 
 type InjectKey = string | Symbol;
 
+// mark 组件选项结构，平常写的最多的代码
 declare type ComponentOptions = {
   componentId?: string;
 
@@ -81,6 +82,7 @@ declare type ComponentOptions = {
   _base: Class<Component>;
 };
 
+// props 自定义属性时结构
 declare type PropOptions = {
   type: Function | Array<Function> | null;
   default: any;

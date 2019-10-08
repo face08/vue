@@ -4,11 +4,12 @@ import config from '../config'
 import { warn } from './debug'
 import { inBrowser, inWeex } from './env'
 
+// 页面错误处理
 export function handleError (err: Error, vm: any, info: string) {
   if (vm) {
     let cur = vm
     while ((cur = cur.$parent)) {
-      const hooks = cur.$options.errorCaptured
+      const hooks = cur.$options.errorCaptured  // 页面级别
       if (hooks) {
         for (let i = 0; i < hooks.length; i++) {
           try {
@@ -24,6 +25,7 @@ export function handleError (err: Error, vm: any, info: string) {
   globalHandleError(err, vm, info)
 }
 
+// 全局错误处理
 function globalHandleError (err, vm, info) {
   if (config.errorHandler) {
     try {
@@ -35,6 +37,7 @@ function globalHandleError (err, vm, info) {
   logError(err, vm, info)
 }
 
+// 打印错误日志
 function logError (err, vm, info) {
   if (process.env.NODE_ENV !== 'production') {
     warn(`Error in ${info}: "${err.toString()}"`, vm)

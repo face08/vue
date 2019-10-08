@@ -92,6 +92,7 @@ export function toNumber (val: string): number | string {
 }
 
 /**
+ * 生成map，检测key是否存在
  * Make a map and return a function for checking if a key
  * is in that map.
  */
@@ -104,6 +105,7 @@ export function makeMap (
   for (let i = 0; i < list.length; i++) {
     map[list[i]] = true
   }
+  // 返回检查函数
   return expectsLowerCase
     ? val => map[val.toLowerCase()]
     : val => map[val]
@@ -251,7 +253,7 @@ export function toObject (arr: Array<any>): Object {
 export function noop (a?: any, b?: any, c?: any) {}
 
 /**
- * Always return false.
+ * 不存在：Always return false.
  */
 export const no = (a?: any, b?: any, c?: any) => false
 

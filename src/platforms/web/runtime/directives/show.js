@@ -1,7 +1,9 @@
 /* @flow */
+// 显示过渡效果
 
 import { enter, leave } from '../modules/transition'
 
+// 递归查找过渡效果的定义
 // recursively search for possible transition defined inside the component root
 function locateNode (vnode: VNode): VNodeWithData {
   return vnode.componentInstance && (!vnode.data || !vnode.data.transition)

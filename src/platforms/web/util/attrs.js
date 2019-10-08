@@ -17,8 +17,10 @@ export const mustUseProp = (tag: string, type: ?string, attr: string): boolean =
   )
 }
 
+// 枚举属性
 export const isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck')
 
+// 布尔属性
 export const isBooleanAttr = makeMap(
   'allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
   'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +

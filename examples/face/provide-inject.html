@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>teat</title>
+  <script src="../../dist/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  <parent>
+    <div>
+      <h1>demo</h1>
+      <grand-son></grand-son>
+    </div>
+  </parent>
+</div>
+
+<script>
+
+  Vue.component('parent', {
+    template: '' +
+      '<div>\n' +
+      ' <slot />\n' +
+      '</div>',
+    provide: {
+      pName: 'test'
+    }
+  });
+
+  Vue.component('grand-son', {
+    template: '' +
+      '<div>\n' +
+      ' {{pName}}' +
+      '</div>',
+    inject: ['pName'],
+  });
+
+  // 参数：options
+  var vm = new Vue({
+    el: '#app',
+    data: {
+      name: 'hello vue',
+    },
+  });
+
+</script>
+</body>
+</html>

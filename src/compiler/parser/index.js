@@ -1,4 +1,5 @@
 /* @flow */
+// 解析：主要是parse函数，和一系列processXXX函数
 
 import he from 'he'
 import { parseHTML } from './html-parser'
@@ -41,8 +42,10 @@ let platformIsPreTag
 let platformMustUseProp
 let platformGetTagNamespace
 
+// 自定义属性类型
 type Attr = { name: string; value: string };
 
+// mark 创建ast元素
 export function createASTElement (
   tag: string,
   attrs: Array<Attr>,
@@ -59,30 +62,36 @@ export function createASTElement (
 }
 
 /**
+ * html 转为 ast
  * Convert HTML string to AST.
  */
 export function parse (
   template: string,
   options: CompilerOptions
 ): ASTElement | void {
+  // 开始
+
+  // 定义option临时参数
   warn = options.warn || baseWarn
 
   platformIsPreTag = options.isPreTag || no
   platformMustUseProp = options.mustUseProp || no
   platformGetTagNamespace = options.getTagNamespace || no
 
+  // 其它解析模块
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
 
   delimiters = options.delimiters
 
-  const stack = []
+  // 定义解析需要的变量
+  const stack = []  // 元素标签的堆栈
   const preserveWhitespace = options.preserveWhitespace !== false
   let root
-  let currentParent
-  let inVPre = false
-  let inPre = false
+  let currentParent   // 当前元素
+  let inVPre = false  // 是否在v-pre里面
+  let inPre = false   // 是否pre元素
   let warned = false
 
   function warnOnce (msg) {
@@ -92,6 +101,10 @@ export function parse (
     }
   }
 
+  /**
+   * 关闭el
+   * @param element
+   */
   function closeElement (element) {
     // check pre state
     if (element.pre) {
@@ -106,7 +119,11 @@ export function parse (
     }
   }
 
+  /**
+   * 解析html：然后回调fun参数、start、end、chars、comment
+   */
   parseHTML(template, {
+    // 普通参数
     warn,
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
@@ -114,6 +131,15 @@ export function parse (
     shouldDecodeNewlines: options.shouldDecodeNewlines,
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
+
+    //以下为fun参数
+
+    /**
+     *
+     * @param tag 标签
+     * @param attrs 属性
+     * @param unary 是否一元
+     */
     start (tag, attrs, unary) {
       // check namespace.
       // inherit parent ns if there is one
@@ -125,11 +151,13 @@ export function parse (
         attrs = guardIESVGBug(attrs)
       }
 
+      // 生成ast树
       let element: ASTElement = createASTElement(tag, attrs, currentParent)
       if (ns) {
         element.ns = ns
       }
 
+      // 是否是禁止元素
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
         process.env.NODE_ENV !== 'production' && warn(
@@ -144,18 +172,24 @@ export function parse (
         element = preTransforms[i](element, options) || element
       }
 
+      // 如不不在v-pre里
       if (!inVPre) {
         processPre(element)
         if (element.pre) {
           inVPre = true
         }
       }
+
+      // 如果是pre标签
       if (platformIsPreTag(element.tag)) {
         inPre = true
       }
+
+      // 如果在v-pre里
       if (inVPre) {
         processRawAttrs(element)
       } else if (!element.processed) {
+        // 如果没有处理完毕
         // structural directives
         processFor(element)
         processIf(element)
@@ -164,14 +198,22 @@ export function parse (
         processElement(element, options)
       }
 
+      /**
+       * 检测约束条件
+        * @param el
+       */
       function checkRootConstraints (el) {
         if (process.env.NODE_ENV !== 'production') {
+
+          // 不能使用下面的标签
           if (el.tag === 'slot' || el.tag === 'template') {
             warnOnce(
               `Cannot use <${el.tag}> as component root element because it may ` +
               'contain multiple nodes.'
             )
           }
+
+          // 不能含有这个属性
           if (el.attrsMap.hasOwnProperty('v-for')) {
             warnOnce(
               'Cannot use v-for on stateful component root element because ' +
@@ -183,9 +225,11 @@ export function parse (
 
       // tree management
       if (!root) {
+        // 如果没有根节点
         root = element
         checkRootConstraints(root)
       } else if (!stack.length) {
+        // 如果堆栈 == 0
         // allow root elements with v-if, v-else-if and v-else
         if (root.if && (element.elseif || element.else)) {
           checkRootConstraints(element)
@@ -201,22 +245,30 @@ export function parse (
           )
         }
       }
+
+      // 如果有当前元素，并且，没有禁止
       if (currentParent && !element.forbidden) {
         if (element.elseif || element.else) {
+          // 处理if
           processIfConditions(element, currentParent)
         } else if (element.slotScope) { // scoped slot
+          // 处理slot
           currentParent.plain = false
           const name = element.slotTarget || '"default"'
           ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
         } else {
+          // 放入子元素
           currentParent.children.push(element)
           element.parent = currentParent
         }
       }
+
       if (!unary) {
+        // 如果不是一元的，放入堆栈
         currentParent = element
         stack.push(element)
       } else {
+        // 如果是一元的
         closeElement(element)
       }
     },
@@ -225,6 +277,7 @@ export function parse (
       // remove trailing whitespace
       const element = stack[stack.length - 1]
       const lastNode = element.children[element.children.length - 1]
+      //
       if (lastNode && lastNode.type === 3 && lastNode.text === ' ' && !inPre) {
         element.children.pop()
       }
@@ -279,6 +332,7 @@ export function parse (
         }
       }
     },
+
     comment (text: string) {
       currentParent.children.push({
         type: 3,
@@ -290,15 +344,20 @@ export function parse (
   return root
 }
 
+// ========= parese 结束
+
+// 处理v-pre
 function processPre (el) {
   if (getAndRemoveAttr(el, 'v-pre') != null) {
     el.pre = true
   }
 }
 
+// 处理属性，复制attrsList然后赋值给el.attrs
 function processRawAttrs (el) {
   const l = el.attrsList.length
   if (l) {
+    // 赋值给el.attrs
     const attrs = el.attrs = new Array(l)
     for (let i = 0; i < l; i++) {
       attrs[i] = {
@@ -360,6 +419,7 @@ export function processFor (el: ASTElement) {
   }
 }
 
+// 自定义For解析类型
 type ForParseResult = {
   for: string;
   alias: string;
@@ -367,6 +427,16 @@ type ForParseResult = {
   iterator2?: string;
 };
 
+/**
+ * 解析for公式，如：(value, name, index) in object
+ * @param exp
+ {
+  "for": "object",
+  "alias": "value",
+  "iterator1": "name",
+  "iterator2": "index"
+  }
+ */
 export function parseFor (exp: string): ?ForParseResult {
   const inMatch = exp.match(forAliasRE)
   if (!inMatch) return
@@ -386,6 +456,10 @@ export function parseFor (exp: string): ?ForParseResult {
   return res
 }
 
+/**
+ * 解析if
+ * @param el
+ */
 function processIf (el) {
   const exp = getAndRemoveAttr(el, 'v-if')
   if (exp) {
@@ -516,15 +590,16 @@ function processAttrs (el) {
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
     value = list[i].value
+    // 如果是指令
     if (dirRE.test(name)) {
       // mark element as dynamic
-      el.hasBindings = true
+      el.hasBindings = true   // 标记有bingding
       // modifiers
       modifiers = parseModifiers(name)
       if (modifiers) {
         name = name.replace(modifierRE, '')
       }
-      if (bindRE.test(name)) { // v-bind
+      if (bindRE.test(name)) { // 检查v-bind
         name = name.replace(bindRE, '')
         value = parseFilters(value)
         isProp = false
@@ -552,10 +627,10 @@ function processAttrs (el) {
         } else {
           addAttr(el, name, value)
         }
-      } else if (onRE.test(name)) { // v-on
+      } else if (onRE.test(name)) { // 检查：v-on
         name = name.replace(onRE, '')
         addHandler(el, name, value, modifiers, false, warn)
-      } else { // normal directives
+      } else { // 普通指令：normal directives
         name = name.replace(dirRE, '')
         // parse arg
         const argMatch = name.match(argRE)
@@ -603,7 +678,7 @@ function checkInFor (el: ASTElement): boolean {
   }
   return false
 }
-
+// 比如：v-model
 function parseModifiers (name: string): Object | void {
   const match = name.match(modifierRE)
   if (match) {
@@ -657,7 +732,7 @@ function guardIESVGBug (attrs) {
   }
   return res
 }
-
+// 检查
 function checkForAliasModel (el, value) {
   let _el = el
   while (_el) {

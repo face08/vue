@@ -1,4 +1,5 @@
 /* @flow */
+// 编译html到虚拟节点
 
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
@@ -14,7 +15,7 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
-// 主要是：转为render函数
+// 重写挂载函数：转为render函数，然后再次调用挂载函数
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (
   el?: string | Element,
@@ -65,12 +66,14 @@ Vue.prototype.$mount = function (
         mark('compile')
       }
 
-      const { render, staticRenderFns } = compileToFunctions(template, {
-        shouldDecodeNewlines,
-        shouldDecodeNewlinesForHref,
-        delimiters: options.delimiters,
-        comments: options.comments
-      }, this)
+      // 编译
+      const {render, staticRenderFns} = compileToFunctions(template,
+        {
+          shouldDecodeNewlines,
+          shouldDecodeNewlinesForHref,
+          delimiters: options.delimiters,
+          comments: options.comments
+        }, this)
       options.render = render
       options.staticRenderFns = staticRenderFns
 

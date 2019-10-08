@@ -3,7 +3,15 @@
 import { extend, warn, isObject } from 'core/util/index'
 
 /**
- * Runtime helper for rendering <slot>
+ * Runtime helper for rendering <slot>  slot指令
+ */
+/**
+ *
+ * @param name  slot 名称，默认default
+ * @param fallback
+ * @param props
+ * @param bindObject
+ * @returns {VNode|Array<VNode>|*}
  */
 export function renderSlot (
   name: string,
@@ -11,6 +19,7 @@ export function renderSlot (
   props: ?Object,
   bindObject: ?Object
 ): ?Array<VNode> {
+  // this ？？？
   const scopedSlotFn = this.$scopedSlots[name]
   let nodes
   if (scopedSlotFn) { // scoped slot
@@ -26,6 +35,7 @@ export function renderSlot (
     }
     nodes = scopedSlotFn(props) || fallback
   } else {
+    // 查找节点vnode
     const slotNodes = this.$slots[name]
     // warn duplicate slot usage
     if (slotNodes) {

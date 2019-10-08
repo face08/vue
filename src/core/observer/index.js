@@ -19,6 +19,7 @@ import {
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
 /**
+ * 是否应该打开观察
  * In some cases we may want to disable observation inside a component's
  * update computation.
  */
@@ -39,11 +40,15 @@ export class Observer {
   dep: Dep;
   vmCount: number; // number of vms that has this object as root $data
 
+  /**
+   *
+   * @param value 自定义的data数据
+   */
   constructor (value: any) {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
-    def(value, '__ob__', this)
+    def(value, '__ob__', this)  // Observer 对象自己
     if (Array.isArray(value)) {
       const augment = hasProto
         ? protoAugment
@@ -56,6 +61,7 @@ export class Observer {
   }
 
   /**
+   * 观察obj：遍历obj所有属性，添加响应式处理
    * Walk through each property and convert them into
    * getter/setters. This method should only be called when
    * value type is Object.
@@ -63,11 +69,12 @@ export class Observer {
   walk (obj: Object) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
-      defineReactive(obj, keys[i])
+      defineReactive(obj, keys[i])  // 添加响应式处理
     }
   }
 
   /**
+   * 观察数组：
    * Observe a list of Array items.
    */
   observeArray (items: Array<any>) {
@@ -77,7 +84,7 @@ export class Observer {
   }
 }
 
-// helpers
+// ============================helpers=============================
 
 /**
  * Augment an target Object or Array by intercepting
@@ -102,6 +109,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
 }
 
 /**
+ * 创建观察者
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
@@ -129,16 +137,22 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 }
 
 /**
+ * 定义响应式
  * Define a reactive property on an Object.
+ * @param obj
+ * @param key
+ * @param val
+ * @param customSetter
+ * @param shallow
  */
 export function defineReactive (
   obj: Object,
   key: string,
   val: any,
   customSetter?: ?Function,
-  shallow?: boolean
+  shallow?: boolean // 浅检测
 ) {
-  const dep = new Dep()
+  const dep = new Dep() // 用途？？？
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
@@ -152,14 +166,16 @@ export function defineReactive (
     val = obj[key]
   }
 
-  let childOb = !shallow && observe(val)
+  // mark 定义双向绑定
+  let childOb = !shallow && observe(val)  // 递归观察子属性
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
+      // 添加依赖
       if (Dep.target) {
-        dep.depend()
+        dep.depend()   // 添加订阅者
         if (childOb) {
           childOb.dep.depend()
           if (Array.isArray(value)) {
@@ -184,13 +200,15 @@ export function defineReactive (
       } else {
         val = newVal
       }
-      childOb = !shallow && observe(newVal)
+      childOb = !shallow && observe(newVal) // 新的值是object的话，进行监听
+      // 发送通知
       dep.notify()
     }
   })
 }
 
 /**
+ * mark 函数$set：这是全局 Vue.set 的别名，Vue.prototype.$set = set
  * Set a property on an object. Adds the new property and
  * triggers change notification if the property doesn't
  * already exist.
@@ -228,6 +246,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
 }
 
 /**
+ * mark 函数$delete，Vue.prototype.$delete = del
  * Delete a property and trigger change if necessary.
  */
 export function del (target: Array<any> | Object, key: any) {
@@ -259,6 +278,7 @@ export function del (target: Array<any> | Object, key: any) {
 }
 
 /**
+ *
  * Collect dependencies on array elements when the array is touched, since
  * we cannot intercept array element access like property getters.
  */

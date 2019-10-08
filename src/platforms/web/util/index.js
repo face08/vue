@@ -7,6 +7,7 @@ export * from './class'
 export * from './element'
 
 /**
+ * 根据字符串获取element
  * Query an element selector if it's not an element already.
  */
 export function query (el: string | Element): Element {

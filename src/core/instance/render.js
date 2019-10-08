@@ -15,6 +15,7 @@ import VNode, { createEmptyVNode } from '../vdom/vnode'
 
 import { isUpdatingChildComponent } from './lifecycle'
 
+// 给实例添加render相关函数
 export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
@@ -53,13 +54,15 @@ export function initRender (vm: Component) {
 // 混入render
 export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
-  // 添加帮助函数
+  // 添加render帮助函数
   installRenderHelpers(Vue.prototype)
 
+  // mark 主要函数  $nextTick
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)
   }
 
+  // mark 主要功能函数  _render
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
@@ -82,6 +85,7 @@ export function renderMixin (Vue: Class<Component>) {
     // render self
     let vnode
     try {
+      // 调用render函数
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
       handleError(e, vm, `render`)

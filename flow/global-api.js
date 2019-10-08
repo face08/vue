@@ -1,3 +1,4 @@
+// 全局api
 declare interface GlobalAPI {
   cid: number;
   options: Object;

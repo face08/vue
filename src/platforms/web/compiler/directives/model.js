@@ -1,4 +1,5 @@
 /* @flow */
+// 指令：v-model，生成各种model代码
 
 import config from 'core/config'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
@@ -11,6 +12,13 @@ let warn
 export const RANGE_TOKEN = '__r'
 export const CHECKBOX_RADIO_TOKEN = '__c'
 
+/**
+ *  生成各种model代码
+ * @param el
+ * @param dir
+ * @param _warn
+ * @returns {boolean}
+ */
 export default function model (
   el: ASTElement,
   dir: ASTDirective,
@@ -62,6 +70,7 @@ export default function model (
   return true
 }
 
+// 生成CheckBox的model代码
 function genCheckboxModel (
   el: ASTElement,
   value: string,
@@ -71,6 +80,7 @@ function genCheckboxModel (
   const valueBinding = getBindingAttr(el, 'value') || 'null'
   const trueValueBinding = getBindingAttr(el, 'true-value') || 'true'
   const falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
+  // 添加属性：Array.isArray(msg)?_i(msg,null)>-1:(msg)
   addProp(el, 'checked',
     `Array.isArray(${value})` +
     `?_i(${value},${valueBinding})>-1` + (
@@ -79,6 +89,7 @@ function genCheckboxModel (
         : `:_q(${value},${trueValueBinding})`
     )
   )
+  // 添加事件：var $$a=msg,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_i($$a,$$v);if($$el.checked){$$i<0&&(msg=$$a.concat([$$v]))}else{$$i>-1&&(msg=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}}else{msg=$$c}
   addHandler(el, 'change',
     `var $$a=${value},` +
         '$$el=$event.target,' +
@@ -93,6 +104,7 @@ function genCheckboxModel (
   )
 }
 
+// 生成radio的model
 function genRadioModel (
   el: ASTElement,
   value: string,
@@ -105,6 +117,7 @@ function genRadioModel (
   addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true)
 }
 
+// 生成select 代码
 function genSelect (
   el: ASTElement,
   value: string,
@@ -122,6 +135,7 @@ function genSelect (
   addHandler(el, 'change', code, null, true)
 }
 
+// 生成默认model代码
 function genDefaultModel (
   el: ASTElement,
   value: string,

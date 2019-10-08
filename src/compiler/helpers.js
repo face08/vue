@@ -16,22 +16,23 @@ export function pluckModuleFunction<F: Function> (
     : []
 }
 
+// 添加属性
 export function addProp (el: ASTElement, name: string, value: string) {
   (el.props || (el.props = [])).push({ name, value })
   el.plain = false
 }
-
+// 添加 attr
 export function addAttr (el: ASTElement, name: string, value: any) {
   (el.attrs || (el.attrs = [])).push({ name, value })
   el.plain = false
 }
 
-// add a raw attr (use this in preTransforms)
+// 添加原生属性：add a raw attr (use this in preTransforms)
 export function addRawAttr (el: ASTElement, name: string, value: any) {
   el.attrsMap[name] = value
   el.attrsList.push({ name, value })
 }
-
+// 添加指令
 export function addDirective (
   el: ASTElement,
   name: string,
@@ -44,6 +45,7 @@ export function addDirective (
   el.plain = false
 }
 
+// 添加事件处理，添加到el.events
 export function addHandler (
   el: ASTElement,
   name: string,
@@ -120,6 +122,13 @@ export function addHandler (
   el.plain = false
 }
 
+/**
+ * 获取bind的属性值，添加上：或者v-bind：,然后调用getAndRemoveAttr
+ * @param el ast元素
+ * @param name  属性名称
+ * @param getStatic
+ * @returns {string|string|*|string}
+ */
 export function getBindingAttr (
   el: ASTElement,
   name: string,
@@ -128,6 +137,7 @@ export function getBindingAttr (
   const dynamicValue =
     getAndRemoveAttr(el, ':' + name) ||
     getAndRemoveAttr(el, 'v-bind:' + name)
+  // sss
   if (dynamicValue != null) {
     return parseFilters(dynamicValue)
   } else if (getStatic !== false) {
@@ -142,6 +152,13 @@ export function getBindingAttr (
 // doesn't get processed by processAttrs.
 // By default it does NOT remove it from the map (attrsMap) because the map is
 // needed during codegen.
+/**
+ * 获取属性并删除之
+ * @param el  ast元素
+ * @param name 属性名称
+ * @param removeFromMap 是否要移除
+ * @returns {*}
+ */
 export function getAndRemoveAttr (
   el: ASTElement,
   name: string,

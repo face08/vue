@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>teat</title>
+  <script src="../../dist/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  <div>{{name}}</div>
+  <input type="text" @keyup.face="onUp">
+</div>
+
+<script>
+
+  Vue.config.keyCodes = {
+    face: 86,//v
+    f1: 112,
+    // camelCase 不可用
+    mediaPlayPause: 179,
+    // 取而代之的是 kebab-case 且用双引号括起来
+    "media-play-pause": 179,
+    up: [38, 87]
+  }
+
+  // 参数：options
+  var vm = new Vue({
+    el: '#app',
+    data: {
+      name: 'hello vue',
+    },
+    methods: {
+      onUp: function (e) {
+        console.log('onUp', e)
+      }
+    }
+  });
+
+</script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 /* @flow */
+// 原生属性设置
 
 import { isIE, isIE9, isEdge } from 'core/util/env'
 
@@ -17,6 +18,11 @@ import {
   isFalsyAttrValue
 } from 'web/util/index'
 
+/**
+ * 更新attrs
+ * @param oldVnode
+ * @param vnode
+ */
 function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const opts = vnode.componentOptions
   if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) {
@@ -34,6 +40,7 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     attrs = vnode.data.attrs = extend({}, attrs)
   }
 
+  // 更新
   for (key in attrs) {
     cur = attrs[key]
     old = oldAttrs[key]
@@ -41,12 +48,16 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       setAttr(elm, key, cur)
     }
   }
+
+  // 特殊处理
   // #4391: in IE9, setting type can reset value for input[type=radio]
   // #6666: IE/Edge forces progress value down to 1 before setting a max
   /* istanbul ignore if */
   if ((isIE || isEdge) && attrs.value !== oldAttrs.value) {
     setAttr(elm, 'value', attrs.value)
   }
+
+  // 移除
   for (key in oldAttrs) {
     if (isUndef(attrs[key])) {
       if (isXlink(key)) {
@@ -58,12 +69,21 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 }
 
+/**
+ * 设置属性
+ * @param el
+ * @param key
+ * @param value
+ */
 function setAttr (el: Element, key: string, value: any) {
   if (el.tagName.indexOf('-') > -1) {
     baseSetAttr(el, key, value)
   } else if (isBooleanAttr(key)) {
+    // 如果是布尔属性
+
     // set attribute for blank value
     // e.g. <option disabled>Select one</option>
+    // 移除如果是null || false
     if (isFalsyAttrValue(value)) {
       el.removeAttribute(key)
     } else {
@@ -87,10 +107,17 @@ function setAttr (el: Element, key: string, value: any) {
   }
 }
 
+/**
+ * 基本属性设置
+ * @param el
+ * @param key
+ * @param value
+ */
 function baseSetAttr (el, key, value) {
   if (isFalsyAttrValue(value)) {
     el.removeAttribute(key)
   } else {
+    // IE 特殊bug处理
     // #7138: IE10 & 11 fires input event when setting placeholder on
     // <textarea>... block the first input event and remove the blocker
     // immediately.
@@ -108,6 +135,9 @@ function baseSetAttr (el, key, value) {
       // $flow-disable-line
       el.__ieph = true /* IE placeholder patched */
     }
+    // ===============bug处理结束
+
+
     el.setAttribute(key, value)
   }
 }

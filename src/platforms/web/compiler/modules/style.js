@@ -8,6 +8,11 @@ import {
   baseWarn
 } from 'compiler/helpers'
 
+/**
+ * 解析 style 和 :style,然后生成需要的代码
+ * @param el
+ * @param options
+ */
 function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticStyle = getAndRemoveAttr(el, 'style')
@@ -33,6 +38,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   }
 }
 
+//  生成 style相关代码，如：staticStyle:{"background":"#333"},style:(styleObject),
 function genData (el: ASTElement): string {
   let data = ''
   if (el.staticStyle) {

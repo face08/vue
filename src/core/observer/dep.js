@@ -7,13 +7,16 @@ import config from '../config'
 let uid = 0
 
 /**
+ * 一个属性可能有多个依赖
+ * 每个响应式数据都有一个Dep来管理它的依赖
+ * 一个属性可能有多个依赖
  * A dep is an observable that can have multiple
  * directives subscribing to it.
  */
 export default class Dep {
-  static target: ?Watcher;
+  static target: ?Watcher;  // 目标
   id: number;
-  subs: Array<Watcher>;
+  subs: Array<Watcher>; // 子watcher
 
   constructor () {
     this.id = uid++
@@ -28,12 +31,14 @@ export default class Dep {
     remove(this.subs, sub)
   }
 
+  // 添加依赖
   depend () {
     if (Dep.target) {
       Dep.target.addDep(this)
     }
   }
 
+  // 通知
   notify () {
     // stabilize the subscriber list first
     const subs = this.subs.slice()
@@ -49,6 +54,7 @@ export default class Dep {
   }
 }
 
+// 由于需要在闭包内添加watcher，所以通过Dep定义一个全局target属性，暂存watcher, 添加完移除
 // the current target watcher being evaluated.
 // this is globally unique because there could be only one
 // watcher being evaluated at any time.

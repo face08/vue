@@ -1,3 +1,7 @@
+/**
+ * 性能调试有关,记录调试起始、结束时间
+ */
+
 import { inBrowser } from './env'
 
 export let mark

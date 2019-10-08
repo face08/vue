@@ -1,18 +1,19 @@
+// 编译参数选项
 declare type CompilerOptions = {
-  warn?: Function; // allow customizing warning in different environments; e.g. node
-  modules?: Array<ModuleOptions>; // platform specific modules; e.g. style; class
-  directives?: { [key: string]: Function }; // platform specific directives
+  warn?: Function; // allow customizing warning in different environments; e.g. node    自定义警告信息
+  modules?: Array<ModuleOptions>; // platform specific modules; e.g. style; class   平台指定的特殊模块
+  directives?: { [key: string]: Function }; // platform specific directives   平台指定的特殊指令
   staticKeys?: string; // a list of AST properties to be considered static; for optimization
-  isUnaryTag?: (tag: string) => ?boolean; // check if a tag is unary for the platform
-  canBeLeftOpenTag?: (tag: string) => ?boolean; // check if a tag can be left opened
-  isReservedTag?: (tag: string) => ?boolean; // check if a tag is a native for the platform
-  preserveWhitespace?: boolean; // preserve whitespace between elements?
-  optimize?: boolean; // optimize static content?
+  isUnaryTag?: (tag: string) => ?boolean; // check if a tag is unary for the platform   是否一元tag
+  canBeLeftOpenTag?: (tag: string) => ?boolean; // check if a tag can be left opened    是否可以left open
+  isReservedTag?: (tag: string) => ?boolean; // check if a tag is a native for the platform 是否保留tag
+  preserveWhitespace?: boolean; // preserve whitespace between elements?    是否保留空格
+  optimize?: boolean; // optimize static content?   是否优化
 
   // web specific
   mustUseProp?: (tag: string, type: ?string, name: string) => boolean; // check if an attribute should be bound as a property
-  isPreTag?: (attr: string) => ?boolean; // check if a tag needs to preserve whitespace
-  getTagNamespace?: (tag: string) => ?string; // check the namespace for a tag
+  isPreTag?: (attr: string) => ?boolean; // check if a tag needs to preserve whitespace   是否 == pre
+  getTagNamespace?: (tag: string) => ?string; // check the namespace for a tag  获取namespace
   expectHTML?: boolean; // only false for non-web builds
   isFromDOM?: boolean;
   shouldDecodeTags?: boolean;
@@ -20,17 +21,18 @@ declare type CompilerOptions = {
   shouldDecodeNewlinesForHref?: boolean;
 
   // runtime user-configurable
-  delimiters?: [string, string]; // template delimiters
-  comments?: boolean; // preserve comments in template
+  delimiters?: [string, string]; // template delimiters   分隔符
+  comments?: boolean; // preserve comments in template    是否保留注释
 
   // for ssr optimization compiler
   scopeId?: string;
 };
 
+// 编译结果
 declare type CompiledResult = {
   ast: ?ASTElement;
   render: string;
-  staticRenderFns: Array<string>;
+  staticRenderFns: Array<string>; // todo
   stringRenderFns?: Array<string>;
   errors?: Array<string>;
   tips?: Array<string>;
@@ -74,6 +76,7 @@ declare type ASTDirective = {
 
 declare type ASTNode = ASTElement | ASTText | ASTExpression;
 
+// 语法抽象树
 declare type ASTElement = {
   type: 1;
   tag: string;
@@ -108,12 +111,14 @@ declare type ASTElement = {
   ref?: string;
   refInFor?: boolean;
 
+  // if指令
   if?: string;
   ifProcessed?: boolean;
   elseif?: string;
   else?: true;
   ifConditions?: ASTIfConditions;
 
+  // for指令
   for?: string;
   forProcessed?: boolean;
   key?: string;
@@ -121,8 +126,8 @@ declare type ASTElement = {
   iterator1?: string;
   iterator2?: string;
 
-  staticClass?: string;
-  classBinding?: string;
+  staticClass?: string;     // 静态class
+  classBinding?: string;    // 绑定class
   staticStyle?: string;
   styleBinding?: string;
   events?: ASTElementHandlers;
@@ -152,6 +157,7 @@ declare type ASTElement = {
   appendAsTree?: boolean;
 };
 
+// 表达式
 declare type ASTExpression = {
   type: 2;
   expression: string;
@@ -162,6 +168,7 @@ declare type ASTExpression = {
   ssrOptimizability?: number;
 };
 
+// 文本
 declare type ASTText = {
   type: 3;
   text: string;
