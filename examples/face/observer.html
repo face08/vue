@@ -9,15 +9,24 @@
 <div id="app">
   nameAge：{{ nameAge }}<br>
   姓名：{{ name }}<br>
-
   年龄：{{age}}<br>
   说明：{{info.content}}
+
   <div v-if="ok">性别：{{info.sex}}</div>
   <button v-on:click="onClick">Add 1</button>
+
+  <div>
+    <b>测试多个name引用时，watcher数量，是同一个1</b>
+    <div>姓名2：{{ name }}</div>
+    <b>测试computed时，是另外一个2</b>
+    <div>姓名2：{{ fullName }}</div>
+    <b>测试watch时又是另外一个3</b>
+  </div>
+
 </div>
 
 <!--
-  转换后的代码
+  转换后的render代码
   (function anonymous() {
     with (this) {
       return _c('div', {attrs: {"id": "app"}},
@@ -51,6 +60,16 @@
     //     this.nameAge = data.name + '-' + data.age
     //   }
     // },
+    computed: {
+      fullName: function () {
+        return this.name + "-book";
+      }
+    },
+    watch: {
+      age: function (val, oldVal) {
+        console.log('new: %s, old: %s', val, oldVal)
+      }
+    },
     created: function () {
       Vue.set(data.info, 'sex', '男')
       this.ok = true;

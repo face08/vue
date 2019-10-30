@@ -9,11 +9,17 @@
 <div id="app">
   nameAge：{{ nameAge }}<br>
   姓名：{{ name }}<br>
-
   年龄：{{age}}<br>
   说明：{{info.content}}
-  <div v-if="ok">性别：{{info.sex}}</div>
+
+  <div v-if="ok">v-if</div>
+  <div v-show="ok">v-show</div>
   <button v-on:click="onClick">Add 1</button>
+  <img v-bind:src="imageSrc">
+  <img :src="imageSrc">
+
+  <input v-model="message" placeholder="edit me">
+  <p>Message is: {{ message }}</p>
 </div>
 
 <!--
@@ -31,10 +37,12 @@
 <!-- JavaScript 代码需要放在尾部（指定的HTML元素之后） -->
 <script>
   var data = {
+    message: 'test model',
     nameAge: '11',
     name: '简书',
     ok: false,
     age: '3',
+    imageSrc: 'http://www.baidu.com/img/bd_logo1.png',
     info: {
       content: 'my name is test'
     }
@@ -53,14 +61,15 @@
     // },
     created: function () {
       Vue.set(data.info, 'sex', '男')
-      this.ok = true;
+      // this.ok = true;
       // this.$set(data.info, 'what is this?');
     },
     methods: {
       onClick: function () {
         console.log('onclick')
+        this.ok = true;
         // this.$emit('faceClick')
-        this.$set(data, 'age', '11')
+        // this.$set(data, 'age', '11')
       }
     }
   });

@@ -10,8 +10,8 @@
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
-import { makeMap, no } from 'shared/util'
-import { isNonPhrasingTag } from 'web/compiler/util'
+import {makeMap, no} from 'shared/util'
+import {isNonPhrasingTag} from 'web/compiler/util'
 
 // 解析模板的正则表达式
 // Regular Expressions for parsing tags and attributes
@@ -52,7 +52,7 @@ const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10|#9);/g
 const isIgnoreNewlineTag = makeMap('pre,textarea', true)
 const shouldIgnoreFirstNewline = (tag, html) => tag && isIgnoreNewlineTag(tag) && html[0] === '\n'
 
-function decodeAttr (value, shouldDecodeNewlines) {
+function decodeAttr(value, shouldDecodeNewlines) {
   const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
   return value.replace(re, match => decodingMap[match])
 }
@@ -62,7 +62,7 @@ function decodeAttr (value, shouldDecodeNewlines) {
  * @param html 要编译的模板
  * @param options 编译的参数
  */
-export function parseHTML (html, options) {
+export function parseHTML(html, options) {
   const stack = []  // 元素堆栈
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
@@ -137,7 +137,7 @@ export function parseHTML (html, options) {
           !startTagOpen.test(rest) &&
           !comment.test(rest) &&
           !conditionalComment.test(rest)
-        ) {
+          ) {
           // < in plain text, be forgiving and treat it as text
           next = rest.indexOf('<', 1)
           if (next < 0) break
@@ -153,7 +153,7 @@ export function parseHTML (html, options) {
         html = ''
       }
 
-      // 处理字符
+      // mark 处理字符
       if (options.chars && text) {
         options.chars(text)
       }
@@ -206,19 +206,19 @@ export function parseHTML (html, options) {
 
 
   // 前进多少字符
-  function advance (n) {
+  function advance(n) {
     index += n
     html = html.substring(n)
   }
 
   /**
-   * 解析开始tag
+   * mark 解析开始tag
    * @returns {{start: number, tagName: *, attrs: Array}}
    */
-  function parseStartTag () {
+  function parseStartTag() {
     const start = html.match(startTagOpen)
     if (start) {
-      // 匹配到的元素
+      // mark 匹配到的元素
       const match = {
         tagName: start[1],
         attrs: [],
@@ -238,6 +238,7 @@ export function parseHTML (html, options) {
         match.unarySlash = end[1]
         advance(end[0].length)
         match.end = index
+        console.log("html解析：", JSON.stringify(match))
         return match
       }
     }
@@ -247,7 +248,7 @@ export function parseHTML (html, options) {
    * 处理开始tag
    * @param match
    */
-  function handleStartTag (match) {
+  function handleStartTag(match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
 
@@ -269,9 +270,15 @@ export function parseHTML (html, options) {
       const args = match.attrs[i]
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
       if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
-        if (args[3] === '') { delete args[3] }
-        if (args[4] === '') { delete args[4] }
-        if (args[5] === '') { delete args[5] }
+        if (args[3] === '') {
+          delete args[3]
+        }
+        if (args[4] === '') {
+          delete args[4]
+        }
+        if (args[5] === '') {
+          delete args[5]
+        }
       }
       const value = args[3] || args[4] || args[5] || ''
       const shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
@@ -285,7 +292,7 @@ export function parseHTML (html, options) {
 
     // 存入堆栈
     if (!unary) {
-      stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs })
+      stack.push({tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs})
       lastTag = tagName
     }
 
@@ -297,11 +304,11 @@ export function parseHTML (html, options) {
 
   /**
    * 解析结束tag
-    * @param tagName
+   * @param tagName
    * @param start
    * @param end
    */
-  function parseEndTag (tagName, start, end) {
+  function parseEndTag(tagName, start, end) {
     let pos, lowerCasedTagName
     if (start == null) start = index
     if (end == null) end = index

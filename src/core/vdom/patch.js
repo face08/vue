@@ -67,6 +67,7 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   return map
 }
 
+// mark 返回__patch__ 函数
 export function createPatchFunction (backend) {
   let i, j
   const cbs = {}
@@ -122,6 +123,7 @@ export function createPatchFunction (backend) {
 
   let creatingElmInVPre = 0
 
+  // mark 真实创建html-dom
   function createElm (
     vnode,
     insertedVnodeQueue,
@@ -205,6 +207,7 @@ export function createPatchFunction (backend) {
       vnode.elm = nodeOps.createTextNode(vnode.text)
       insert(parentElm, vnode.elm, refElm)
     }
+    console.log('html-dom', vnode.elm.outerHTML)
   }
 
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
@@ -682,6 +685,7 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // mark 返回函数
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
     if (isUndef(vnode)) {
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)

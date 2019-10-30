@@ -32,7 +32,7 @@ function _traverse (val: any, seen: SimpleSet) {
     if (seen.has(depId)) {
       return
     }
-    seen.add(depId) // 缓存记录
+    seen.add(depId) // mark 缓存记录
   }
 
   // 复杂类型：数组或对象，递归调用

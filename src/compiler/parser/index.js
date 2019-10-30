@@ -271,6 +271,8 @@ export function parse (
         // 如果是一元的
         closeElement(element)
       }
+
+      console.log("html解析-ast：", element);
     },
 
     end () {
@@ -288,6 +290,7 @@ export function parse (
     },
 
     chars (text: string) {
+      console.log("html解析-字符串：", text);
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
           if (text === template) {
@@ -331,6 +334,7 @@ export function parse (
           })
         }
       }
+      console.log("html解析-children：", children)
     },
 
     comment (text: string) {

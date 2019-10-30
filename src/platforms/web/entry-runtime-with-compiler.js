@@ -37,7 +37,9 @@ Vue.prototype.$mount = function (
   // 如果没有render，转为render
   if (!options.render) {
     let template = options.template
+
     if (template) {
+      // 如果有template模板
       if (typeof template === 'string') {
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
@@ -58,8 +60,11 @@ Vue.prototype.$mount = function (
         return this
       }
     } else if (el) {
-      template = getOuterHTML(el)
+      // 如果有el模板
+      template = getOuterHTML(el)  // 根据id获取原始html元素
     }
+
+    // 如果找到2种模板之一
     if (template) {
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -74,7 +79,7 @@ Vue.prototype.$mount = function (
           delimiters: options.delimiters,
           comments: options.comments
         }, this)
-      options.render = render
+      options.render = render // mark render函数赋值
       options.staticRenderFns = staticRenderFns
 
       /* istanbul ignore if */
@@ -84,7 +89,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
-  // 回调mount函数：src/platforms/web/runtime/index.js
+  // mark 回调mount函数：src/platforms/web/runtime/index.js
   return mount.call(this, el, hydrating)
 }
 

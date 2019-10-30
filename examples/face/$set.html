@@ -9,10 +9,10 @@
 <div id="app">
   nameAge：{{ nameAge }}<br>
   姓名：{{ name }}<br>
-
   年龄：{{age}}<br>
   说明：{{info.content}}
-  <div v-if="ok">性别：{{info.sex}}</div>
+
+  <div v-if="info.ok">性别：{{info.sex}}</div>
   <button v-on:click="onClick">Add 1</button>
 </div>
 
@@ -33,7 +33,6 @@
   var data = {
     nameAge: '11',
     name: '简书',
-    ok: false,
     age: '3',
     info: {
       content: 'my name is test'
@@ -44,22 +43,19 @@
   // 参数：options
   var vm = new Vue({
     el: '#app',
-    // props: {propA: Number},
+    props: {propA: Number},
     data: data,
-    // watch: {
-    //   age: function () {
-    //     this.nameAge = data.name + '-' + data.age
-    //   }
-    // },
+    watch: {
+      age: function () {
+        this.nameAge = data.name + '-' + data.age
+      }
+    },
     created: function () {
       Vue.set(data.info, 'sex', '男')
-      this.ok = true;
-      // this.$set(data.info, 'what is this?');
     },
     methods: {
       onClick: function () {
-        console.log('onclick')
-        // this.$emit('faceClick')
+        Vue.set(data.info, 'ok', true)
         this.$set(data, 'age', '11')
       }
     }

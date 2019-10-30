@@ -32,14 +32,16 @@ export default class Watcher {
   computed: boolean;
   sync: boolean;
   dirty: boolean;
-  active: boolean;
+  active: boolean;  // 是否激活状态
   dep: Dep;
-  deps: Array<Dep>;
+
+  deps: Array<Dep>; // deps数组
   newDeps: Array<Dep>;
+
   depIds: SimpleSet;
   newDepIds: SimpleSet;
   before: ?Function;
-  getter: Function;
+  getter: Function; // expOrFn表达式或path
   value: any;
 
   constructor (
@@ -75,11 +77,12 @@ export default class Watcher {
     this.expression = process.env.NODE_ENV !== 'production'
       ? expOrFn.toString()
       : ''
+
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {
-      this.getter = parsePath(expOrFn)
+      this.getter = parsePath(expOrFn)  // mark 自定义watch属性改变时走这里
       if (!this.getter) {
         this.getter = function () {}
         process.env.NODE_ENV !== 'production' && warn(
@@ -103,7 +106,7 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
-    pushTarget(this)  // dep内函数
+    pushTarget(this)  // mark dep内函数
     let value
     const vm = this.vm
     try {
@@ -118,22 +121,26 @@ export default class Watcher {
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
       if (this.deep) {
-        traverse(value)
+        traverse(value) //
       }
-      popTarget()
+      popTarget() // mark 出栈
       this.cleanupDeps()
     }
     return value
   }
 
   /**
+   * 添加watcher到dep
    * Add a dependency to this directive.
+   * @param dep 要添加到的dep
    */
   addDep (dep: Dep) {
+    console.log("watch-id:", this.id)
     const id = dep.id
     if (!this.newDepIds.has(id)) {
       this.newDepIds.add(id)
       this.newDeps.push(dep)
+
       if (!this.depIds.has(id)) {
         dep.addSub(this)
       }
@@ -144,6 +151,7 @@ export default class Watcher {
    * Clean up for dependency collection.
    */
   cleanupDeps () {
+    // 清理deps
     let i = this.deps.length
     while (i--) {
       const dep = this.deps[i]
@@ -151,10 +159,14 @@ export default class Watcher {
         dep.removeSub(this)
       }
     }
+
+    // 置换depIds和newDepIds
     let tmp = this.depIds
     this.depIds = this.newDepIds
     this.newDepIds = tmp
     this.newDepIds.clear()
+
+    // 置换deps和newDeps
     tmp = this.deps
     this.deps = this.newDeps
     this.newDeps = tmp
@@ -177,10 +189,11 @@ export default class Watcher {
         // so we simply mark the watcher as dirty. The actual computation is
         // performed just-in-time in this.evaluate() when the computed property
         // is accessed.
-        this.dirty = true
+        this.dirty = true // 标记为脏，需要时再计算
       } else {
+        // 在激活模式下，主动计算
         // In activated mode, we want to proactively perform the computation
-        // but only notify our subscribers when the value has indeed changed.
+        // but onlnewDepsy notify our subscribers when the value has indeed changed.
         this.getAndInvoke(() => {
           this.dep.notify()
         })
@@ -193,6 +206,7 @@ export default class Watcher {
   }
 
   /**
+   * 任务调度
    * Scheduler job interface.
    * Will be called by the scheduler.
    */
@@ -202,6 +216,10 @@ export default class Watcher {
     }
   }
 
+  /**
+   * 获取值，并回调
+   * @param cb  属性回调函数，比如watch里的
+   */
   getAndInvoke (cb: Function) {
     const value = this.get()
     if (
@@ -218,7 +236,7 @@ export default class Watcher {
       this.dirty = false
       if (this.user) {
         try {
-          cb.call(this.vm, value, oldValue)
+          cb.call(this.vmScheduler, value, oldValue)
         } catch (e) {
           handleError(e, this.vm, `callback for watcher "${this.expression}"`)
         }
@@ -229,6 +247,7 @@ export default class Watcher {
   }
 
   /**
+   * 评估
    * Evaluate and return the value of the watcher.
    * This only gets called for computed property watchers.
    */
@@ -241,6 +260,7 @@ export default class Watcher {
   }
 
   /**
+   * 添加依赖
    * Depend on this watcher. Only for computed property watchers.
    */
   depend () {
@@ -250,6 +270,7 @@ export default class Watcher {
   }
 
   /**
+   * 取消观察：移除自己
    * Remove self from all dependencies' subscriber list.
    */
   teardown () {
@@ -262,7 +283,7 @@ export default class Watcher {
       }
       let i = this.deps.length
       while (i--) {
-        this.deps[i].removeSub(this)
+        this.deps[i].removeSub(this)  // 从dep中移除自己
       }
       this.active = false
     }

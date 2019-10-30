@@ -20,7 +20,7 @@ type TextParseResult = {
 }
 
 /**
- * 解析文本，有什么特别的地方？？
+ * 解析文本，有什么特别的地方 比如：nameAge：{{ nameAge }}
  * @param text
  * @param delimiters
  * @returns {{expression: string, tokens: Array}}
@@ -46,7 +46,7 @@ export function parseText (
     }
     // tag token
     const exp = parseFilters(match[1].trim())
-    tokens.push(`_s(${exp})`)
+    tokens.push(`_s(${exp})`)   // mark 添加runtime函数_s
     rawTokens.push({ '@binding': exp })
     lastIndex = index + match[0].length
   }

@@ -1,5 +1,7 @@
 /* @flow */
 
+// 都是render时调用的函数
+
 import { toNumber, toString, looseEqual, looseIndexOf } from 'shared/util'
 import { createTextVNode, createEmptyVNode } from 'core/vdom/vnode'
 import { renderList } from './render-list'

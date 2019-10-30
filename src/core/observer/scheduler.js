@@ -13,8 +13,10 @@ import {
 
 export const MAX_UPDATE_COUNT = 100
 
+// 2个队列
 const queue: Array<Watcher> = []  // watcher队列
 const activatedChildren: Array<Component> = []  // activated队列
+
 let has: { [key: number]: ?true } = {}  // id是否存在
 let circular: { [key: number]: number } = {}
 let waiting = false //等待执行
@@ -35,7 +37,7 @@ function resetSchedulerState () {
 }
 
 /**
- * 刷新队列并运行观察者。
+ * mark 下一帧执行：刷新队列并运行观察者。
  * Flush both queues and run the watchers.
  */
 function flushSchedulerQueue () {
@@ -61,13 +63,15 @@ function flushSchedulerQueue () {
   // as we run existing watchers
   for (index = 0; index < queue.length; index++) {
     watcher = queue[index]
+    // 如果有before函数,be
     if (watcher.before) {
       watcher.before()
     }
     id = watcher.id
     has[id] = null
     watcher.run()
-    // in dev build, check and stop circular updates.
+
+    // 开发模式：in dev build, check and stop circular updates.
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > MAX_UPDATE_COUNT) {
@@ -90,7 +94,7 @@ function flushSchedulerQueue () {
 
   resetSchedulerState()
 
-  // call component updated and activated hooks
+  // 调用钩子函数，call component updated and activated hooks
   callActivatedHooks(activatedQueue)
   callUpdatedHooks(updatedQueue)
 
@@ -124,6 +128,7 @@ export function queueActivatedComponent (vm: Component) {
   activatedChildren.push(vm)
 }
 
+// mark 调用activated声明周期函数
 function callActivatedHooks (queue) {
   for (let i = 0; i < queue.length; i++) {
     queue[i]._inactive = true
@@ -132,6 +137,7 @@ function callActivatedHooks (queue) {
 }
 
 /**
+ * watch 的 update 函数调用
  * 把一个watcher放在队列中，拥有相同的ID的任务将会被停止，除非当队列正在flush的加入的。
  * Push a watcher into the watcher queue.
  * Jobs with duplicate IDs will be skipped unless it's
@@ -152,7 +158,7 @@ export function queueWatcher (watcher: Watcher) {
       while (i > index && queue[i].id > watcher.id) {
         i--
       }
-      queue.splice(i + 1, 0, watcher)
+      queue.splice(i + 1, 0, watcher) // 插入
     }
     // queue the flush
     if (!waiting) {

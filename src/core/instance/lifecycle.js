@@ -53,15 +53,21 @@ export function initLifecycle (vm: Component) {
 // https://vuejs.org/v2/api/#vm-mount
 export function lifecycleMixin (Vue: Class<Component>) {
 
+  /**
+   *
+   * @param vnode render后的vnode节点
+   * @param hydrating
+   * @private
+   */
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
-    const prevVnode = vm._vnode
+    const prevVnode = vm._vnode   // 获取上一次保存的节点
     const prevActiveInstance = activeInstance
     activeInstance = vm
-    vm._vnode = vnode
+    vm._vnode = vnode // 保存该次节点信息
 
-    // 更新节点
+    // mark 【更新节点,由vnode 转为html真实的dom】
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
@@ -141,7 +147,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
-// $mount 编译完毕后，挂载时候调用
+// mark $mount 编译完毕后，挂载时候调用
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -191,7 +197,7 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
-      vm._update(vm._render(), hydrating) // 更新组件？
+      vm._update(vm._render(), hydrating) // todo 更新组件???
     }
   }
 
@@ -289,6 +295,11 @@ function isInInactiveTree (vm) {
   return false
 }
 
+/**
+ * scheduler里调用的
+ * @param vm
+ * @param direct
+ */
 export function activateChildComponent (vm: Component, direct?: boolean) {
   if (direct) {
     vm._directInactive = false
@@ -303,7 +314,7 @@ export function activateChildComponent (vm: Component, direct?: boolean) {
     for (let i = 0; i < vm.$children.length; i++) {
       activateChildComponent(vm.$children[i])
     }
-    callHook(vm, 'activated')  // mark 生命周期函数
+    callHook(vm, 'activated')  // mark 生命周期函数 keep-alive 组件激活时调用
   }
 }
 

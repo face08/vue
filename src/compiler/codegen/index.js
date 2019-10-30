@@ -184,6 +184,14 @@ function genIfConditions (
   }
 }
 
+/**
+ * 解析for模板
+ * @param el
+ * @param state
+ * @param altGen
+ * @param altHelper
+ * @returns {string}
+ */
 export function genFor (
   el: any,
   state: CodegenState,

@@ -1,3 +1,5 @@
+// 给vdom使用的
+
 import attrs from './attrs'
 import klass from './class'
 import events from './events'

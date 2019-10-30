@@ -18,7 +18,7 @@ export function renderList (
     // 数组
     ret = new Array(val.length)
     for (i = 0, l = val.length; i < l; i++) {
-      ret[i] = render(val[i], i)
+      ret[i] = render(val[i], i)  // mark 调用传递过来的render
     }
   } else if (typeof val === 'number') {
     // 数字

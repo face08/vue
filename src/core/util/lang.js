@@ -11,6 +11,10 @@ export function isReserved (str: string): boolean {
 
 /**
  * 定义 a property.默认可写、可配置
+ * @param obj 拦截对象 Array
+ * @param key 拦截属性 push
+ * @param val 值，拦截函数fun
+ * @param enumerable
  */
 export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
   Object.defineProperty(obj, key, {
@@ -22,7 +26,7 @@ export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
 }
 
 /**
- * 解析一个路径
+ * 解析一个路径，变量访问要watch的属性
  * Parse simple path.
  * ("a.hello")({ a: { hello: 'world' } }) 返回为world
  */

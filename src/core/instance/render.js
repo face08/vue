@@ -54,7 +54,7 @@ export function initRender (vm: Component) {
 // 混入render
 export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
-  // 添加render帮助函数
+  // mark 添加render帮助函数
   installRenderHelpers(Vue.prototype)
 
   // mark 主要函数  $nextTick
@@ -62,10 +62,10 @@ export function renderMixin (Vue: Class<Component>) {
     return nextTick(fn, this)
   }
 
-  // mark 主要功能函数  _render
+  // mark 主要功能函数  _render  渲染函数
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
-    const { render, _parentVnode } = vm.$options
+    const { render, _parentVnode } = vm.$options  // 取出编译后的模板函数
 
     // reset _rendered flag on slots for duplicate slot check
     if (process.env.NODE_ENV !== 'production') {
@@ -85,7 +85,7 @@ export function renderMixin (Vue: Class<Component>) {
     // render self
     let vnode
     try {
-      // 调用render函数
+      // mark 调用编译后的render函数，然后返回vnode; render既是编译后的字符串函数
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
       handleError(e, vm, `render`)

@@ -48,6 +48,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.set = function proxySetter (val) {
     this[sourceKey][key] = val
   }
+  // 跳过_data，直接由vm访问key
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
@@ -68,7 +69,7 @@ export function initState (vm: Component) {
   }
 }
 
-// 初始化props
+// 初始化props，组件携带的属性
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
@@ -138,7 +139,7 @@ function initData (vm: Component) {
   const props = vm.$options.props
   const methods = vm.$options.methods
   let i = keys.length
-  // 遍历data的key
+  // 遍历data的key，一一添加属性代理
   while (i--) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
@@ -181,7 +182,7 @@ export function getData (data: Function, vm: Component): any {
 
 const computedWatcherOptions = { computed: true }
 
-// 初始化computed
+// mark 初始化computed，添加watch
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
   const watchers = vm._computedWatchers = Object.create(null)
@@ -257,7 +258,7 @@ export function defineComputed (
   }
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
-
+// mark 触发watch函数绑定
 function createComputedGetter (key) {
   return function computedGetter () {
     const watcher = this._computedWatchers && this._computedWatchers[key]
@@ -300,7 +301,7 @@ function initMethods (vm: Component, methods: Object) {
   }
 }
 
-// 初始化watch
+// mark 初始化watch,遍历创建watcher,把自定义handler传入watcher
 function initWatch (vm: Component, watch: Object) {
   for (const key in watch) {
     const handler = watch[key]
@@ -361,6 +362,7 @@ export function stateMixin (Vue: Class<Component>) {
 
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
+  // mark 创建$watch https://cn.vuejs.org/v2/api/#vm-watch
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
@@ -377,7 +379,7 @@ export function stateMixin (Vue: Class<Component>) {
     const watcher = new Watcher(vm, expOrFn, cb, options)
     if (options.immediate) {
       cb.call(vm, watcher.value)
-    }
+    } // 取消观察
     return function unwatchFn () {
       watcher.teardown()
     }

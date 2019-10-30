@@ -449,7 +449,7 @@ export function mergeOptions (
 }
 
 /**
- *
+ * mark 过滤功能
  * @param options vm.$options
  * @param type  filters
  * @param id  自定义过滤指令，比如：capitalize

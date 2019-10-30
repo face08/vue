@@ -8,7 +8,7 @@ type CompiledFunctionResult = {
   staticRenderFns: Array<Function>;
 };
 
-// mark 创建函数
+// mark 创建函数,编译后的字符串，生成func函数
 function createFunction (code, errors) {
   try {
     return new Function(code)
@@ -22,6 +22,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
   const cache = Object.create(null)
 
   /**
+   * 把模板转为字符串，然后转为函数
    * @template  模板字符串
    * @options   编译参数
    * @vm        vm实例
@@ -81,7 +82,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     // turn code into functions
     const res = {}
     const fnGenErrors = []
-    res.render = createFunction(compiled.render, fnGenErrors)
+    res.render = createFunction(compiled.render, fnGenErrors)   // mark 转为函数
     res.staticRenderFns = compiled.staticRenderFns.map(code => {
       return createFunction(code, fnGenErrors)
     })

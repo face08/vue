@@ -10,6 +10,7 @@ import { warn, extend, isPlainObject } from 'core/util/index'
  * eventObj  v-on指令的值即要注入事件的对象
  */
 export function bindObjectListeners (data: any, value: any): VNodeData {
+  debugger
   if (value) {
     if (!isPlainObject(value)) {
       process.env.NODE_ENV !== 'production' && warn(
